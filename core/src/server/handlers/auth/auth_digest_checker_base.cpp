@@ -77,6 +77,8 @@ AuthCheckerDigestBase::AuthCheckerDigestBase(
 AuthCheckResult AuthCheckerDigestBase::CheckAuth(
     const server::http::HttpRequest& request,
     server::request::RequestContext&) const {
+  auto& response = request.GetHttpResponse();
+
   const auto& auth_value =
       request.GetHeader(userver::http::headers::kAuthorization);
   if (auth_value.empty()) {
@@ -143,7 +145,6 @@ AuthCheckResult AuthCheckerDigestBase::CheckAuth(
   auto digest = digest_hasher_.GetHash(digest_value);
   LOG_DEBUG() << "DIGEST: " << digest << " " << client_context.response;
 
-  
   if (!crypto::algorithm::AreStringsEqualConstTime(digest, client_context.response)) {
     throw CustomHandlerException(impl::CustomHandlerExceptionData{
         server::handlers::HandlerErrorCode::kUnauthorized,
@@ -151,6 +152,11 @@ AuthCheckResult AuthCheckerDigestBase::CheckAuth(
                                     false)});
   }
 
+  // successful authorization
+  // create and add auth-info header with 200 OK code
+  auto info_header = ConstructAuthInfoHeader(ha1, client_context);
+  std::string_view st = "Authentication-Info";
+  response.SetHeader(st, info_header);
   return {};
 };
 
@@ -180,6 +186,26 @@ ExtraHeaders AuthCheckerDigestBase::ConstructResponseDirectives(
       fmt::format("{}=\"{}\", ", kTypesToDirectives.TryFind(DirectiveTypes::kAlgorithm).value(), algorithm_),
       fmt::format("{}=\"{}\"", kTypesToDirectives.TryFind(DirectiveTypes::kQop).value(), qops_str_));
   return extra_headers;
+}
+
+std::string AuthCheckerDigestBase::ConstructAuthInfoHeader(
+    std::string_view ha1, DigestContextFromClient client_context) const {
+  auto nextnonce = digest_hasher_.Nonce();
+  // qop = auth
+  auto a2 = fmt::format(":{}", client_context.uri);
+  // qop = auth-int 
+  // auto a2 = fmt::format("{}:{}", client_context.uri, entity-body);
+  std::string ha2 = digest_hasher_.GetHash(a2);
+  std::string digest_value = fmt::format("{}:{}:{}:{}:{}:{}",
+    ha1, client_context.nonce, client_context.nc,
+    client_context.cnonce, client_context.qop, ha2);
+  auto response_digest = digest_hasher_.GetHash(digest_value);
+  return utils::StrCat(
+      fmt::format("{}=\"{}\", ", "nextnonce", nextnonce),
+      fmt::format("{}=\"{}\", ", kTypesToDirectives.TryFind(DirectiveTypes::kQop).value(), client_context.qop),
+      fmt::format("{}=\"{}\", ", "rspauth", response_digest),
+      fmt::format("{}=\"{}\", ", "cnonce", client_context.cnonce),
+      fmt::format("{}=\"{}\", ", "nc", client_context.nc));
 }
 // clang-format on
 

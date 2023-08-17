@@ -67,6 +67,8 @@ class AuthCheckerDigestBase : public server::handlers::auth::AuthCheckerBase {
   ExtraHeaders ConstructResponseDirectives(std::string_view nonce,
                                            std::string_view opaque,
                                            bool stale) const;
+
+  std::string ConstructAuthInfoHeader(std::string_view ha1, DigestContextFromClient client_context) const;
   void StartNewAuthSession(std::string_view username,
                            std::string_view client_nonce,
                            std::string_view client_opaque, bool stale) const;
