@@ -24,6 +24,7 @@ USERVER_NAMESPACE_BEGIN
 namespace server::handlers::auth {
 
 constexpr std::string_view kDigestWord = "Digest";
+constexpr std::string_view kAuthenticationInfo = "Authentication-Info";
 
 DigestHasher::DigestHasher(const Algorithm& algorithm) {
   switch (
@@ -155,8 +156,7 @@ AuthCheckResult AuthCheckerDigestBase::CheckAuth(
   // successful authorization
   // create and add auth-info header with 200 OK code
   auto info_header = ConstructAuthInfoHeader(ha1, client_context);
-  std::string_view st = "Authentication-Info";
-  response.SetHeader(st, info_header);
+  response.SetHeader(kAuthenticationInfo, info_header);
   return {};
 };
 
