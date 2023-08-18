@@ -1,6 +1,7 @@
 #include <userver/server/handlers/auth/auth_digest_checker_base.hpp>
 
 #include <chrono>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -56,17 +57,12 @@ std::string DigestHasher::GetHash(std::string_view data) const {
   return hash_algorithm_(data, crypto::hash::OutputEncoding::kHex);
 }
 
-using Nonce = std::string;
-using Username = std::string;
-using NonceCount = std::uint32_t;
-
 AuthCheckerDigestBase::AuthCheckerDigestBase(
     const AuthDigestSettings& digest_settings, Realm realm)
     : qops_(digest_settings.qops),
       qops_str_(fmt::format("{}", fmt::join(qops_, ","))),
       realm_(std::move(realm)),
-      domains_(digest_settings.domains),
-      domains_str_(fmt::format("{}", fmt::join(domains_, ", "))),
+      domains_str_(fmt::format("{}", fmt::join(digest_settings.domains, ", "))),
       algorithm_(digest_settings.algorithm),
       is_session_(digest_settings.is_session.value_or(false)),
       is_proxy_(digest_settings.is_proxy.value_or(false)),
@@ -79,9 +75,8 @@ AuthCheckerDigestBase::AuthCheckerDigestBase(
                                 ? userver::http::headers::kProxyAuthorization
                                 : userver::http::headers::kAuthorization),
       unauthorized_status_(
-          is_proxy_
-              ? userver::server::http::HttpStatus::kProxyAuthenticationRequired
-              : userver::server::http::HttpStatus::kUnauthorized) {}
+          is_proxy_ ? server::http::HttpStatus::kProxyAuthenticationRequired
+                    : server::http::HttpStatus::kUnauthorized) {}
 
 AuthCheckResult AuthCheckerDigestBase::CheckAuth(
     const server::http::HttpRequest& request,
@@ -173,16 +168,16 @@ AuthCheckResult AuthCheckerDigestBase::CheckAuth(
 };
 
 AuthCheckResult AuthCheckerDigestBase::StartNewAuthSession(
-    std::string_view username, std::string_view client_nonce,
-    std::string_view client_opaque, bool stale,
+    const std::string& username, const std::string& nonce_from_client,
+    const std::string& opaque_from_client, bool stale,
     server::http::HttpResponse& response) const {
-  client_data_.Emplace(username.data(),
-                       ClientData{client_nonce.data(), client_opaque.data(),
-                                  std::chrono::system_clock::now()});
+  auto client_data_ptr = std::make_shared<ClientData>(nonce_from_client, opaque_from_client,
+                                          std::chrono::system_clock::now());
+  client_data_.InsertOrAssign(username, client_data_ptr);
   response.SetStatus(unauthorized_status_);
-  response.SetHeader(
-      authenticate_header_,
-      ConstructResponseDirectives(client_nonce, client_opaque, stale));
+  response.SetHeader(authenticate_header_,
+                     ConstructResponseDirectives(nonce_from_client,
+                                                 opaque_from_client, stale));
 
   return AuthCheckResult{AuthCheckResult::Status::kInvalidToken};
 }
@@ -226,14 +221,14 @@ std::string AuthCheckerDigestBase::ConstructAuthInfoHeader(
 bool AuthCheckerDigestBase::IsNonceExpired(
     const std::string& username, std::string_view nonce_from_client) const {
   const auto& client_data = client_data_[username];
-  if (client_data->timestamp + nonce_ttl_ < std::chrono::system_clock::now()) {
-    return false;
-  }
-  LOG_DEBUG() << "TIMESTAMP IS OK";
   LOG_DEBUG() << "NONCE: " << client_data->nonce;
   LOG_DEBUG() << "NONCE_FROM_CLIENT: " << nonce_from_client;
-  return !crypto::algorithm::AreStringsEqualConstTime(client_data->nonce,
-                                                      nonce_from_client);
+  if (!crypto::algorithm::AreStringsEqualConstTime(client_data->nonce,
+                                                   nonce_from_client)) {
+    return false;
+  }
+
+  return client_data->timestamp + nonce_ttl_ < std::chrono::system_clock::now();
 }
 
 }  // namespace server::handlers::auth
