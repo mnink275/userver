@@ -19,6 +19,8 @@ constexpr std::string_view kOpaque = "opaque";
 constexpr std::string_view kQop = "qop";
 constexpr std::string_view kNonceCount = "nc";
 constexpr std::string_view kAuthParam = "auth-param";
+constexpr std::string_view kNextNonce = "nextnonce";
+constexpr std::string_view kResponseAuth = "rspauth";
 
 }  // namespace server::handlers::auth::directives
 

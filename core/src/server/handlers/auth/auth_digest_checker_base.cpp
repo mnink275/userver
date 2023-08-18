@@ -161,13 +161,6 @@ AuthCheckResult AuthCheckerDigestBase::CheckAuth(
   auto digest = digest_hasher_.GetHash(digest_value);
   LOG_DEBUG() << "DIGEST: " << digest << " " << client_context.response;
 
-<<<<<<< HEAD
-  if (!crypto::algorithm::AreStringsEqualConstTime(digest, client_context.response)) {
-    throw CustomHandlerException(impl::CustomHandlerExceptionData{
-        server::handlers::HandlerErrorCode::kUnauthorized,
-        ConstructResponseDirectives(client_context.nonce, client_context.opaque,
-                                    false)});
-=======
   if (!crypto::algorithm::AreStringsEqualConstTime(digest,
                                                    client_context.response)) {
     response.SetStatus(unauthorized_status_);
@@ -175,7 +168,6 @@ AuthCheckResult AuthCheckerDigestBase::CheckAuth(
                        ConstructResponseDirectives(
                            client_context.nonce, client_context.opaque, false));
     return AuthCheckResult{AuthCheckResult::Status::kInvalidToken};
->>>>>>> digest-checker
   }
 
   // successful authorization
@@ -227,12 +219,13 @@ std::string AuthCheckerDigestBase::ConstructAuthInfoHeader(
     client_context.cnonce, client_context.qop, ha2);
   auto response_digest = digest_hasher_.GetHash(digest_value);
   return utils::StrCat(
-      fmt::format("{}=\"{}\", ", "nextnonce", nextnonce),
-      fmt::format("{}=\"{}\", ", kTypesToDirectives.TryFind(DirectiveTypes::kQop).value(), client_context.qop),
-      fmt::format("{}=\"{}\", ", "rspauth", response_digest),
-      fmt::format("{}=\"{}\", ", "cnonce", client_context.cnonce),
-      fmt::format("{}=\"{}\", ", "nc", client_context.nc));
+      fmt::format("{}=\"{}\", ", directives::kNextNonce, nextnonce),
+      fmt::format("{}=\"{}\", ", directives::kQop, client_context.qop),
+      fmt::format("{}=\"{}\", ", directives::kResponseAuth, response_digest),
+      fmt::format("{}=\"{}\", ", directives::kCnonce, client_context.cnonce),
+      fmt::format("{}=\"{}\", ", directives::kNonceCount, client_context.nc));
 }
+
 // clang-format on
 
 bool AuthCheckerDigestBase::IsNonceExpired(
