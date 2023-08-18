@@ -18,7 +18,7 @@
 #include <userver/server/handlers/exceptions.hpp>
 #include <userver/server/handlers/fallback_handlers.hpp>
 #include <userver/utils/algo.hpp>
-#include "userver/server/http/http_response.hpp"
+#include <userver/server/http/http_response.hpp>
 
 USERVER_NAMESPACE_BEGIN
 
@@ -202,7 +202,7 @@ std::string AuthCheckerDigestBase::ConstructResponseDirectives(
 }
 
 std::string AuthCheckerDigestBase::ConstructAuthInfoHeader(
-    std::string_view ha1, DigestContextFromClient client_context) const {
+    std::string_view ha1, const DigestContextFromClient& client_context) const {
   auto nextnonce = digest_hasher_.Nonce();
   // qop = auth
   auto a2 = fmt::format(":{}", client_context.uri);
