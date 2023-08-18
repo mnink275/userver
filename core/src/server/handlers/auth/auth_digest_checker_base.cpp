@@ -88,12 +88,7 @@ AuthCheckResult AuthCheckerDigestBase::CheckAuth(
     server::request::RequestContext&) const {
   auto& response = request.GetHttpResponse();
 
-<<<<<<< HEAD
-  const auto& auth_value =
-      request.GetHeader(userver::http::headers::kAuthorization);
-=======
   const auto& auth_value = request.GetHeader(authorization_header_);
->>>>>>> digest-checker
   if (auth_value.empty()) {
     response.SetStatus(unauthorized_status_);
     response.SetHeader(
