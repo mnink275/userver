@@ -154,7 +154,7 @@ ValidateClientDataResult AuthCheckerDigestBase::ValidateClientData(
   auto client_nc = std::stoul(client_context.nc, nullptr, 16);
   if (user_data.nonce_count < client_nc) {
     UserData user_data{client_context.nonce, client_context.opaque,
-                       utils::datetime::Now()};
+                       utils::datetime::MockNow()};
     SetUserData(client_context.username, std::move(user_data));
   } else {
     return ValidateClientDataResult::kUserNotRegistred;
@@ -175,7 +175,7 @@ std::string AuthCheckerDigestBase::ConstructAuthInfoHeader(
   auto next_nonce = digest_hasher_.Nonce();
 
   UserData user_data{next_nonce, client_context.opaque,
-                     userver::utils::datetime::Now()};
+                     userver::utils::datetime::MockNow()};
   SetUserData(client_context.username, std::move(user_data));
 
   return fmt::format("{}=\"{}\"", directives::kNextNonce, next_nonce);
@@ -186,7 +186,7 @@ AuthCheckResult AuthCheckerDigestBase::StartNewAuthSession(
     const std::string& opaque_from_client, bool stale,
     server::http::HttpResponse& response) const {
   UserData user_data{nonce_from_client, opaque_from_client,
-                     userver::utils::datetime::Now()};
+                     userver::utils::datetime::MockNow()};
   SetUserData(username, std::move(user_data));
   response.SetStatus(unauthorized_status_);
   response.SetHeader(authenticate_header_,
@@ -221,8 +221,8 @@ bool AuthCheckerDigestBase::IsNonceExpired(std::string_view nonce_from_client,
   }
 
   LOG_DEBUG() << "USER NONCE CREATION TIMESTAMP: " << user_data.timestamp;
-  LOG_DEBUG() << "USER NONCE CREATION TIMESTAMP: " << userver::utils::datetime::Now();
-  return user_data.timestamp + nonce_ttl_ < userver::utils::datetime::Now();
+  LOG_DEBUG() << "USER NONCE CREATION TIMESTAMP: " << userver::utils::datetime::MockNow();
+  return user_data.timestamp + nonce_ttl_ < userver::utils::datetime::MockNow();
 }
 
 std::optional<std::string> AuthCheckerDigestBase::CalculateDigest(
