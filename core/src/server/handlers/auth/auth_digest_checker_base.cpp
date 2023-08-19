@@ -20,6 +20,7 @@
 #include <userver/server/handlers/fallback_handlers.hpp>
 #include <userver/utils/algo.hpp>
 #include <userver/utils/datetime.hpp>
+#include <userver/utils/mock_now.hpp>
 #include "userver/server/http/http_response.hpp"
 
 USERVER_NAMESPACE_BEGIN
