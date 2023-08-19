@@ -220,6 +220,8 @@ bool AuthCheckerDigestBase::IsNonceExpired(std::string_view nonce_from_client,
     return true;
   }
 
+  LOG_DEBUG() << "USER NONCE CREATION TIMESTAMP: " << user_data.timestamp;
+  LOG_DEBUG() << "USER NONCE CREATION TIMESTAMP: " << userver::utils::datetime::Now();
   return user_data.timestamp + nonce_ttl_ < userver::utils::datetime::Now();
 }
 
