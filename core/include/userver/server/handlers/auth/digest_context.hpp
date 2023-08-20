@@ -16,15 +16,9 @@ USERVER_NAMESPACE_BEGIN
 
 namespace server::handlers::auth {
 
-<<<<<<< Updated upstream
-// WWW-Authenticate response header from server
-// realm, nonce are mandatory
-// domain, opaque, stale, algorithm, qop, auth-param are optional
-=======
 /// WWW-Authenticate header from server response
 /// realm, nonce directives are mandatory
 /// domain, opaque, stale, algorithm, qop, auth-param directives are optional
->>>>>>> Stashed changes
 struct DigestContextFromServer {
   std::string realm;
   std::string nonce;
@@ -35,15 +29,9 @@ struct DigestContextFromServer {
   std::string opaque;
 };
 
-<<<<<<< Updated upstream
-// authorization request header from client
-// username, realm, nonce, digest-uri, response are mandatory
-// algorithm, cnonce, opaque, qop, nc, auth-param are optional
-=======
 /// Authorization header from client request
 /// username, realm, nonce, digest-uri directives response are mandatory
 /// algorithm, cnonce, opaque, qop, nc, auth-param directives are optional
->>>>>>> Stashed changes
 struct DigestContextFromClient {
   std::string username;
   std::string realm;
