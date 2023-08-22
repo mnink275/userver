@@ -47,6 +47,8 @@ class AuthCheckerDigestBaseStandalone : public AuthCheckerDigestBase {
   void SetUserData(const std::string& username, const Nonce& nonce,
                    std::int32_t nonce_count,
                    TimePoint nonce_creation_time) const override;
+  void PushUnnamedNonce(const Nonce& nonce, std::chrono::milliseconds nonce_ttl) const override;
+  std::optional<TimePoint> GetUnnamedNonceCreationTime(const Nonce& nonce) const override;
   virtual std::optional<UserData::HA1> GetHA1(
       const std::string& username) const = 0;
 

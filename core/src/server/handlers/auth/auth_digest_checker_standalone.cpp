@@ -5,8 +5,8 @@
 #include <string_view>
 
 #include <userver/server/handlers/auth/auth_digest_settings.hpp>
-#include "userver/server/handlers/auth/auth_digest_checker_base.hpp"
-#include "userver/utils/datetime.hpp"
+#include <userver/server/handlers/auth/auth_digest_checker_base.hpp>
+#include <userver/utils/datetime.hpp>
 
 USERVER_NAMESPACE_BEGIN
 
@@ -61,6 +61,22 @@ void AuthCheckerDigestBaseStandalone::SetUserData(
   }
 }
 
+void AuthCheckerDigestBaseStandalone::PushUnnamedNonce(const Nonce& nonce, std::chrono::milliseconds nonce_ttl) const {
+  auto ttl_ptr = 
+    std::make_shared<concurrent::Variable<TimePoint>>(userver::utils::datetime::Now() + nonce_ttl);
+  unnamed_nonces.InsertOrAssign(nonce, ttl_ptr);
+}
+
+std::optional<TimePoint> AuthCheckerDigestBaseStandalone::GetUnnamedNonceCreationTime(const Nonce& nonce) const {
+  auto nonce_time = unnamed_nonces.Get(nonce);
+  if (nonce_time) {
+    auto nonce_time_ptr = nonce_time->Lock();
+    return *nonce_time_ptr;
+  }
+  else {
+    return std::nullopt;
+  }
+}
 }  // namespace server::handlers::auth
 
 USERVER_NAMESPACE_END
