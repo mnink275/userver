@@ -21,6 +21,8 @@
 #include <userver/server/http/http_response.hpp>
 #include <userver/server/http/http_status.hpp>
 #include <userver/server/request/request_context.hpp>
+#include <userver/server/handlers/auth/auth_checker_unnamed_nonce_cache.hpp>
+#include "digest_checker_base.hpp"
 
 USERVER_NAMESPACE_BEGIN
 
@@ -61,11 +63,11 @@ class AuthCheckerDigestBaseStandalone : public DigestCheckerBase {
  private:
   // potentially we store ALL user's data
   // great chance to occupy large block of memory
+  using NonceCache = ExpirableLruCache<std::string, TimePoint>
   mutable rcu::RcuMap<std::string, concurrent::Variable<NonceInfo>> user_data_;
   // cache for "unnamed" nonces, 
   // i.e initial nonces not tied to any user
-  mutable cache::ExpirableLruCache<std::string, TimePoint> unnamed_nonces_{
-      4, 25000};
+  mutable std::shared_ptr<NonceCache> unnamed_nonces_;
 };
 
 }  // namespace server::handlers::auth

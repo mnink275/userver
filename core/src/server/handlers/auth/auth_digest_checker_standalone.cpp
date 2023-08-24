@@ -4,8 +4,6 @@
 #include <optional>
 #include <string_view>
 
-#include <userver/server/handlers/auth/auth_digest_settings.hpp>
-
 USERVER_NAMESPACE_BEGIN
 
 namespace server::handlers::auth {
@@ -16,8 +14,10 @@ NonceInfo::NonceInfo(const std::string& nonce, TimePoint expiration_time,
 
 AuthCheckerDigestBaseStandalone::AuthCheckerDigestBaseStandalone(
     const AuthDigestSettings& digest_settings, std::string&& realm)
-    : DigestCheckerBase(digest_settings, std::move(realm)) {
-  unnamed_nonces_.SetMaxLifetime(digest_settings.nonce_ttl);
+    : DigestCheckerBase(digest_settings, std::move(realm)) { // как-то надо передать в unnamed_nonces_ lrucachewrapper из конфига и из него взять .Get()
+                                                             // https://userver.tech/d0/dd8/md_en_2userver_2lru__cache.html#:~:text=%7D%3B-,After%20that,-%2C%20get%20the%20component
+  unnamed_nonces_->SetMaxLifetime(digest_settings.nonce_ttl);
+
 };
 
 std::optional<UserData> AuthCheckerDigestBaseStandalone::FetchUserData(
@@ -67,16 +67,16 @@ void AuthCheckerDigestBaseStandalone::SetUserData(
 
 void AuthCheckerDigestBaseStandalone::PushUnnamedNonce(
     std::string nonce) const {
-  unnamed_nonces_.Put(nonce,
+  unnamed_nonces_->Put(nonce,
                       static_cast<TimePoint>(userver::utils::datetime::Now()));
 }
 
 std::optional<TimePoint>
 AuthCheckerDigestBaseStandalone::GetUnnamedNonceCreationTime(
     const std::string& nonce) const {
-  auto unnamed_nonce = unnamed_nonces_.GetOptionalNoUpdate(nonce);
+  auto unnamed_nonce = unnamed_nonces_->GetOptionalNoUpdate(nonce);
   if (unnamed_nonce) {
-    unnamed_nonces_.InvalidateByKey(nonce);
+    unnamed_nonces_->InvalidateByKey(nonce);
   }
   return unnamed_nonce;
 }
