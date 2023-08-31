@@ -19,12 +19,16 @@
 #include <userver/server/http/http_response.hpp>
 #include <userver/server/http/http_status.hpp>
 #include <userver/server/request/request_context.hpp>
+#include <userver/storages/secdist/secdist.hpp>
 
 USERVER_NAMESPACE_BEGIN
 
 namespace server::handlers::auth {
 
 using TimePoint = std::chrono::time_point<std::chrono::system_clock>;
+using SecdistConfig = storages::secdist::SecdistConfig;
+using DigestSecretKey =
+    utils::NonLoggable<class DigestSecretKeyTag, std::string>;
 
 /// Used for data hashing and "nonce" generating.
 class DigestHasher final {
@@ -32,7 +36,7 @@ class DigestHasher final {
   /// Constructor from the hash algorithm name from "crypto" namespace.
   /// Subsequently, all methods of the class will use this algorithm for
   /// hashing.
-  DigestHasher(std::string_view algorithm);
+  DigestHasher(std::string_view algorithm, const SecdistConfig& secdist_config);
 
   /// Returns "nonce" directive value in hexadecimal format.
   std::string GenerateNonce(std::string_view etag) const;
@@ -45,6 +49,7 @@ class DigestHasher final {
   using HashAlgorithm = std::function<std::string(
       std::string_view, crypto::hash::OutputEncoding)>;
   HashAlgorithm hash_algorithm_;
+  const SecdistConfig& secdist_config_;
 };
 
 /// Contains information about the user.
@@ -70,7 +75,7 @@ class DigestCheckerBase : public AuthCheckerBase {
   /// @ref server::handlers::auth::DigestCheckerSettingsComponent and "realm"
   /// from handler config in static_config.yaml.
   DigestCheckerBase(const AuthDigestSettings& digest_settings,
-                    std::string&& realm);
+                    std::string&& realm, const SecdistConfig& secdist_config);
 
   DigestCheckerBase(const DigestCheckerBase&) = delete;
   DigestCheckerBase(DigestCheckerBase&&) = delete;

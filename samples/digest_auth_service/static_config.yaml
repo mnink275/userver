@@ -26,6 +26,13 @@ components_manager:
                   - digest  # Authorization type that was specified in main()
                 realm: registred@userver.com
         # /// [hello config]
+
+        secdist: {}                                         # Component that stores configuration of hosts and passwords
+        default-secdist-provider:                           # Component that loads configuration of hosts and passwords
+            config: $secret-data-path                       # Values are supposed to be stored in this file
+            missing-ok: true                                # ... but if the file is missing it is still ok
+            environment-secrets-key: DIGEST_SERVER_SECRET   # ... values will be loaded from this environment value
+
         testsuite-support:
 
         server:

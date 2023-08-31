@@ -15,12 +15,15 @@
 #include <userver/storages/postgres/cluster_types.hpp>
 #include <userver/storages/postgres/component.hpp>
 #include <userver/storages/postgres/result_set.hpp>
+#include <userver/storages/secdist/component.hpp>
+#include <userver/storages/secdist/provider_component.hpp>
 #include <userver/utils/datetime.hpp>
 
 namespace samples::pg {
 
 using UserData = server::handlers::auth::UserData;
 using HA1 = server::handlers::auth::UserData::HA1;
+using SecdistConfig = server::handlers::auth::SecdistConfig;
 
 class AuthCheckerDigest final
     : public server::handlers::auth::DigestCheckerBase {
@@ -30,9 +33,10 @@ class AuthCheckerDigest final
 
   AuthCheckerDigest(const AuthDigestSettings& digest_settings,
                     std::string realm,
-                    const ::components::ComponentContext& context)
-      : server::handlers::auth::DigestCheckerBase(digest_settings,
-                                                  std::move(realm)),
+                    const ::components::ComponentContext& context,
+                    const SecdistConfig& secdist_config)
+      : server::handlers::auth::DigestCheckerBase(
+            digest_settings, std::move(realm), secdist_config),
         pg_cluster_(context.FindComponent<components::Postgres>("auth-database")
                         .GetCluster()),
         nonce_ttl_(digest_settings.nonce_ttl) {}
@@ -115,7 +119,8 @@ server::handlers::auth::AuthCheckerBasePtr CheckerFactory::operator()(
           .GetSettings();
 
   return std::make_shared<AuthCheckerDigest>(
-      digest_auth_settings, auth_config["realm"].As<std::string>({}), context);
+      digest_auth_settings, auth_config["realm"].As<std::string>({}), context,
+      context.FindComponent<components::Secdist>().Get());
 }
 /// [auth checker factory definition]
 
