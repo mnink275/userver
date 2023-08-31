@@ -52,7 +52,7 @@ class StandAloneCheckerTest : public ::testing::Test {
             kNonceTTL                          // nonce_ttl
         }),
         checker_(digest_settings_, "testrealm@host.com"),
-        correct_client_context_(DigestContextFromClient{
+        client_context_(DigestContextFromClient{
             "Mufasa",                            // username
             "testrealm@host.com",                // realm
             kValidNonce,                         // nonce
@@ -64,62 +64,62 @@ class StandAloneCheckerTest : public ::testing::Test {
             "auth",                              // qop
             "00000001",                          // nc
             "auth-param"                         // authparam
-        }) {
-    client_context_ = correct_client_context_;
-  }
+        }),
+        user_data_from_storage_(UserData{
+            kValidHA1,                           // HA1
+            kValidNonce,                         // nonce
+            utils::datetime::Now(),              // nonce_creation_time
+            0                                    // nonce_count
+        }) {}
 
   AuthDigestSettings digest_settings_;
   StandAloneChecker checker_;
   DigestContextFromClient client_context_;
-  DigestContextFromClient correct_client_context_;
+  UserData user_data_from_storage_;
 };
 
 UTEST_F(StandAloneCheckerTest, NonceTTL) {
   utils::datetime::MockNowSet(utils::datetime::Now());
   checker_.PushUnnamedNonce(kValidNonce);
 
-  UserData test_data{kValidHA1, kValidNonce, utils::datetime::Now(), 0};
   utils::datetime::MockSleep(kNonceTTL - std::chrono::milliseconds(100));
-  EXPECT_EQ(checker_.ValidateUserData(client_context_, test_data),
+  EXPECT_EQ(checker_.ValidateUserData(client_context_, user_data_from_storage_),
             ValidateResult::kOk);
 
   utils::datetime::MockSleep(kNonceTTL + std::chrono::milliseconds(100));
-  EXPECT_EQ(checker_.ValidateUserData(client_context_, test_data),
+  EXPECT_EQ(checker_.ValidateUserData(client_context_, user_data_from_storage_),
             ValidateResult::kWrongUserData);
 }
 
 UTEST_F(StandAloneCheckerTest, NonceCount) {
   checker_.PushUnnamedNonce(kValidNonce);
 
-  UserData test_data{kValidHA1, kValidNonce, utils::datetime::Now(), 0};
-  EXPECT_EQ(checker_.ValidateUserData(client_context_, test_data),
+  EXPECT_EQ(checker_.ValidateUserData(client_context_, user_data_from_storage_),
             ValidateResult::kOk);
 
-  test_data.nonce_count++;
-  EXPECT_EQ(checker_.ValidateUserData(client_context_, test_data),
+  user_data_from_storage_.nonce_count = 1;
+  EXPECT_EQ(checker_.ValidateUserData(client_context_, user_data_from_storage_),
             ValidateResult::kDuplicateRequest);
 
-  correct_client_context_.nc = "00000002";
-  client_context_ = correct_client_context_;
-  EXPECT_EQ(checker_.ValidateUserData(client_context_, test_data),
+  client_context_.nc = "00000002";
+  EXPECT_EQ(checker_.ValidateUserData(client_context_, user_data_from_storage_),
             ValidateResult::kOk);
 }
 
 UTEST_F(StandAloneCheckerTest, InvalidNonce) {
-  const auto* invalid_nonce_ = "abc88743bacdf9238";
-  UserData test_data{kValidHA1, invalid_nonce_, utils::datetime::Now(), 0};
-  EXPECT_EQ(checker_.ValidateUserData(client_context_, test_data),
+  std::string wrong_nonce = "3ab3a5e23c925428b089e11e3f3a8369";
+  user_data_from_storage_.nonce = wrong_nonce;
+  EXPECT_EQ(checker_.ValidateUserData(client_context_, user_data_from_storage_),
             ValidateResult::kWrongUserData);
 
-  test_data.nonce = kValidNonce;
-  EXPECT_EQ(checker_.ValidateUserData(client_context_, test_data),
+  user_data_from_storage_.nonce = kValidNonce;
+  EXPECT_EQ(checker_.ValidateUserData(client_context_, user_data_from_storage_),
             ValidateResult::kOk);
 }
 
 UTEST_F(StandAloneCheckerTest, NonceCountConvertingThrow) {
   client_context_.nc = "not-a-hex-number";
-  UserData test_data{kValidHA1, kValidNonce, utils::datetime::Now(), 0};
-  EXPECT_THROW(checker_.ValidateUserData(client_context_, test_data),
+  EXPECT_THROW(checker_.ValidateUserData(client_context_, user_data_from_storage_),
                std::runtime_error);
 }
 
