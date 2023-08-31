@@ -43,7 +43,7 @@ class StandAloneChecker final : public AuthCheckerDigestBaseStandalone {
 class StandAloneCheckerTest : public ::testing::Test {
  public:
   StandAloneCheckerTest()
-      : digest_settings_(AuthDigestSettings{
+      : digest_settings(AuthDigestSettings{
             "MD5",                             // algorithm
             std::vector<std::string>{"/"},     // domains
             std::vector<std::string>{"auth"},  // qops
@@ -51,8 +51,8 @@ class StandAloneCheckerTest : public ::testing::Test {
             false,                             // is_session
             kNonceTTL                          // nonce_ttl
         }),
-        checker_(digest_settings_, "testrealm@host.com"),
-        client_context_(DigestContextFromClient{
+        checker(digest_settings, "testrealm@host.com"),
+        client_context(DigestContextFromClient{
             "Mufasa",                            // username
             "testrealm@host.com",                // realm
             kValidNonce,                         // nonce
@@ -65,61 +65,61 @@ class StandAloneCheckerTest : public ::testing::Test {
             "00000001",                          // nc
             "auth-param"                         // authparam
         }),
-        user_data_from_storage_(UserData{
+        user_data_from_storage(UserData{
             kValidHA1,                           // HA1
             kValidNonce,                         // nonce
             utils::datetime::Now(),              // nonce_creation_time
             0                                    // nonce_count
         }) {}
 
-  AuthDigestSettings digest_settings_;
-  StandAloneChecker checker_;
-  DigestContextFromClient client_context_;
-  UserData user_data_from_storage_;
+  AuthDigestSettings digest_settings;
+  StandAloneChecker checker;
+  DigestContextFromClient client_context;
+  UserData user_data_from_storage;
 };
 
 UTEST_F(StandAloneCheckerTest, NonceTTL) {
   utils::datetime::MockNowSet(utils::datetime::Now());
-  checker_.PushUnnamedNonce(kValidNonce);
+  checker.PushUnnamedNonce(kValidNonce);
 
   utils::datetime::MockSleep(kNonceTTL - std::chrono::milliseconds(100));
-  EXPECT_EQ(checker_.ValidateUserData(client_context_, user_data_from_storage_),
+  EXPECT_EQ(checker.ValidateUserData(client_context, user_data_from_storage),
             ValidateResult::kOk);
 
   utils::datetime::MockSleep(kNonceTTL + std::chrono::milliseconds(100));
-  EXPECT_EQ(checker_.ValidateUserData(client_context_, user_data_from_storage_),
+  EXPECT_EQ(checker.ValidateUserData(client_context, user_data_from_storage),
             ValidateResult::kWrongUserData);
 }
 
 UTEST_F(StandAloneCheckerTest, NonceCount) {
-  checker_.PushUnnamedNonce(kValidNonce);
+  checker.PushUnnamedNonce(kValidNonce);
 
-  EXPECT_EQ(checker_.ValidateUserData(client_context_, user_data_from_storage_),
+  EXPECT_EQ(checker.ValidateUserData(client_context, user_data_from_storage),
             ValidateResult::kOk);
 
-  user_data_from_storage_.nonce_count = 1;
-  EXPECT_EQ(checker_.ValidateUserData(client_context_, user_data_from_storage_),
+  user_data_from_storage.nonce_count = 1;
+  EXPECT_EQ(checker.ValidateUserData(client_context, user_data_from_storage),
             ValidateResult::kDuplicateRequest);
 
-  client_context_.nc = "00000002";
-  EXPECT_EQ(checker_.ValidateUserData(client_context_, user_data_from_storage_),
+  client_context.nc = "00000002";
+  EXPECT_EQ(checker.ValidateUserData(client_context, user_data_from_storage),
             ValidateResult::kOk);
 }
 
 UTEST_F(StandAloneCheckerTest, InvalidNonce) {
   std::string wrong_nonce = "3ab3a5e23c925428b089e11e3f3a8369";
-  user_data_from_storage_.nonce = wrong_nonce;
-  EXPECT_EQ(checker_.ValidateUserData(client_context_, user_data_from_storage_),
+  user_data_from_storage.nonce = wrong_nonce;
+  EXPECT_EQ(checker.ValidateUserData(client_context, user_data_from_storage),
             ValidateResult::kWrongUserData);
 
-  user_data_from_storage_.nonce = kValidNonce;
-  EXPECT_EQ(checker_.ValidateUserData(client_context_, user_data_from_storage_),
+  user_data_from_storage.nonce = kValidNonce;
+  EXPECT_EQ(checker.ValidateUserData(client_context, user_data_from_storage),
             ValidateResult::kOk);
 }
 
 UTEST_F(StandAloneCheckerTest, NonceCountConvertingThrow) {
-  client_context_.nc = "not-a-hex-number";
-  EXPECT_THROW(checker_.ValidateUserData(client_context_, user_data_from_storage_),
+  client_context.nc = "not-a-hex-number";
+  EXPECT_THROW(checker.ValidateUserData(client_context, user_data_from_storage),
                std::runtime_error);
 }
 
