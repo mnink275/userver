@@ -33,9 +33,9 @@ using DigestSecretKey =
 /// Used for data hashing and "nonce" generating.
 class DigestHasher final {
  public:
-  /// Constructor from the hash algorithm name from "crypto" namespace.
-  /// Subsequently, all methods of the class will use this algorithm for
-  /// hashing.
+  /// Constructor from the hash algorithm name from "crypto" namespace
+  /// to be used for hashing and storages::secdist::SecdistConfig containing a
+  /// server secret key to be used for "nonce" generating.
   DigestHasher(std::string_view algorithm, const SecdistConfig& secdist_config);
 
   /// Returns "nonce" directive value in hexadecimal format.

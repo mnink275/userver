@@ -16,14 +16,13 @@
 #include <userver/storages/postgres/component.hpp>
 #include <userver/storages/postgres/result_set.hpp>
 #include <userver/storages/secdist/component.hpp>
-#include <userver/storages/secdist/provider_component.hpp>
 #include <userver/utils/datetime.hpp>
 
 namespace samples::pg {
 
 using UserData = server::handlers::auth::UserData;
 using HA1 = server::handlers::auth::UserData::HA1;
-using SecdistConfig = server::handlers::auth::SecdistConfig;
+using SecdistConfig = storages::secdist::SecdistConfig;
 
 class AuthCheckerDigest final
     : public server::handlers::auth::DigestCheckerBase {

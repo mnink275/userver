@@ -39,7 +39,7 @@ namespace {
 class ServerDigestSecretKey {
  public:
   ServerDigestSecretKey(const formats::json::Value& doc)
-      : secret_key_(doc["digest-server-secret-key"].As<DigestSecretKey>()) {}
+      : secret_key_(doc["server-secret-key"].As<DigestSecretKey>()) {}
 
   const DigestSecretKey& GetSecretKey() const { return secret_key_; }
 
