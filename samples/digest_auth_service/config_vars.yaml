@@ -1,2 +1,2 @@
 testsuite-enabled: false
-secret-data-path: /etc/digest_auth/secure_data.json
+secret-data-path: ${SECRET_JSON_PATH:?NoSecretJsonFound}
