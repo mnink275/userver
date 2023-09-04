@@ -10,6 +10,7 @@
 #include <userver/storages/postgres/cluster.hpp>
 #include <userver/storages/postgres/component.hpp>
 #include <userver/storages/secdist/component.hpp>
+#include <userver/storages/secdist/provider_component.hpp>
 #include <userver/testsuite/testsuite_support.hpp>
 #include <userver/utils/daemon_run.hpp>
 
@@ -41,13 +42,14 @@ int main(int argc, const char* const argv[]) {
   /// [main]
   const auto component_list =
       components::MinimalServerComponentList()
-          .Append<components::Postgres>("auth-database")
           .Append<samples::digest_auth::Hello>()
+          .Append<components::Postgres>("auth-database")
           .Append<components::TestsuiteSupport>()
           .Append<components::HttpClient>()
           .Append<server::handlers::TestsControl>()
           .Append<clients::dns::Component>()
           .Append<components::Secdist>()
+          .Append<components::DefaultSecdistProvider>()
           .Append<server::handlers::auth::DigestCheckerSettingsComponent>();
   return utils::DaemonMain(argc, argv, component_list);
   /// [main]

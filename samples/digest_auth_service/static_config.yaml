@@ -29,7 +29,7 @@ components_manager:
 
         secdist: {}                                         # Component that stores configuration of hosts and passwords
         default-secdist-provider:                           # Component that loads configuration of hosts and passwords
-            config: $secret-data-path                       # Values are supposed to be stored in this file
+            config: ''                     # Values are supposed to be stored in this file
             missing-ok: true                                # ... but if the file is missing it is still ok
             environment-secrets-key: DIGEST_SERVER_SECRET   # ... values will be loaded from this environment value
 

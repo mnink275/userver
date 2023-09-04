@@ -1,2 +1,1 @@
 testsuite-enabled: false
-secret-data-path: ${SECRET_JSON_PATH:?NoSecretJsonFound}

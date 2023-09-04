@@ -2,7 +2,6 @@ project(userver-samples-digest_auth CXX)
 
 add_executable(${PROJECT_NAME} digest_auth_service.cpp auth_digest.cpp)
 target_link_libraries(${PROJECT_NAME} userver-core userver-postgresql)
-set(ENV{SECRET_JSON_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/digest_secret_data.json)
 
 function(userver_multitest_testsuite_add)
     set(options)
@@ -29,3 +28,8 @@ endfunction()
 
 userver_multitest_testsuite_add(TESTS_DIRECTORY common)
 userver_multitest_testsuite_add(TESTS_DIRECTORY proxy)
+
+set_tests_properties(testsuite-${PROJECT_NAME}-common PROPERTIES ENVIRONMENT
+          "DIGEST_SERVER_SECRET={\"server-secret-key\": \"some-private-key\"}")
+set_tests_properties(testsuite-${PROJECT_NAME}-proxy PROPERTIES ENVIRONMENT
+          "DIGEST_SERVER_SECRET={\"server-secret-key\": \"some-private-key\"}")
