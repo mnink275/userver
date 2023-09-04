@@ -18,7 +18,7 @@
 #include <userver/storages/secdist/component.hpp>
 #include <userver/utils/datetime.hpp>
 
-namespace samples::pg {
+namespace samples::digest_auth {
 
 using UserData = server::handlers::auth::UserData;
 using HA1 = server::handlers::auth::UserData::HA1;
@@ -123,4 +123,4 @@ server::handlers::auth::AuthCheckerBasePtr CheckerFactory::operator()(
 }
 /// [auth checker factory definition]
 
-}  // namespace samples::pg
+}  // namespace samples::digest_auth
