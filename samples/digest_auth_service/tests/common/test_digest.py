@@ -18,7 +18,7 @@ async def test_authenticate_base(service_client):
     auth_directives_assert(auth_directives) 
 
     challenge = construct_challenge(auth_directives)
-    auth_header = construct_header("username", "pswd", challenge)
+    auth_header = build_digest_header('GET', '/v1/hello', challenge, "username", "pswd")
 
     response = await service_client.get(
         '/v1/hello', headers={'Authorization': auth_header},
@@ -39,7 +39,7 @@ async def test_authenticate_base_unregisted_user(service_client):
     auth_directives_assert(auth_directives) 
 
     challenge = construct_challenge(auth_directives)
-    auth_header = construct_header("unregistred_username", "pswd", challenge)
+    auth_header = build_digest_header('GET', '/v1/hello', challenge, "unregistred_username", "pswd")
 
     response = await service_client.get(
         '/v1/hello', headers={'Authorization': auth_header},
@@ -58,7 +58,7 @@ async def test_postgres_wrong_data(service_client):
     auth_directives_assert(auth_directives)
 
     challenge = construct_challenge(auth_directives)
-    auth_header = construct_header("username", "wrong-password", challenge)
+    auth_header = build_digest_header('GET', '/v1/hello', challenge, "username", "wrong-password")
 
     response = await service_client.get(
         '/v1/hello', headers={'Authorization': auth_header},
@@ -78,7 +78,7 @@ async def test_repeated_auth(service_client):
     auth_directives_assert(auth_directives)
 
     challenge = construct_challenge(auth_directives)
-    auth_header = construct_header("username", "pswd", challenge)
+    auth_header = build_digest_header('GET', '/v1/hello', challenge, "username", "pswd")
 
     response = await service_client.get(
         '/v1/hello', headers={'Authorization': auth_header},
@@ -90,7 +90,7 @@ async def test_repeated_auth(service_client):
 
     challenge = construct_challenge(
         auth_directives, auth_directives_info['nextnonce'])
-    auth_header = construct_header("username", "pswd", challenge)
+    auth_header = build_digest_header('GET', '/v1/hello', challenge, "username", "pswd")
 
     response = await service_client.get(
         '/v1/hello', headers={'Authorization': auth_header},
@@ -110,7 +110,7 @@ async def test_same_nonce_repeated_use(service_client):
     auth_directives_assert(auth_directives)
 
     challenge = construct_challenge(auth_directives)
-    auth_header = construct_header("username", "pswd", challenge)
+    auth_header = build_digest_header('GET', '/v1/hello', challenge, "username", "pswd")
 
     response = await service_client.get(
         '/v1/hello', headers={'Authorization': auth_header},
@@ -122,7 +122,7 @@ async def test_same_nonce_repeated_use(service_client):
 
     challenge = construct_challenge(
         auth_directives, auth_directives_info['nextnonce'])
-    auth_header = construct_header("username", "pswd", challenge)
+    auth_header = build_digest_header('GET', '/v1/hello', challenge, "username", "pswd")
 
     response = await service_client.get(
         '/v1/hello', headers={'Authorization': auth_header},
@@ -147,7 +147,7 @@ async def test_expiring_nonce(service_client, mocked_time):
     auth_directives_assert(auth_directives)
 
     challenge = construct_challenge(auth_directives)
-    auth_header = construct_header("username", "pswd", challenge)
+    auth_header = build_digest_header('GET', '/v1/hello', challenge, "username", "pswd")
 
     response = await service_client.get(
         '/v1/hello', headers={'Authorization': auth_header},
@@ -162,7 +162,7 @@ async def test_expiring_nonce(service_client, mocked_time):
 
     challenge = construct_challenge(
         auth_directives, auth_directives_info['nextnonce'])
-    auth_header = construct_header("username", "pswd", challenge)
+    auth_header = build_digest_header('GET', '/v1/hello', challenge, "username", "pswd")
 
     response = await service_client.get(
         '/v1/hello', headers={'Authorization': auth_header},
@@ -175,7 +175,7 @@ async def test_expiring_nonce(service_client, mocked_time):
     auth_directives_assert(auth_directives)
 
     challenge = construct_challenge(auth_directives)
-    auth_header = construct_header("username", "pswd", challenge)
+    auth_header = build_digest_header('GET', '/v1/hello', challenge, "username", "pswd")
 
     response = await service_client.get(
         '/v1/hello', headers={'Authorization': auth_header},
@@ -195,7 +195,7 @@ async def test_aliving_nonce_after_half_ttl(service_client, mocked_time):
     auth_directives_assert(auth_directives)
 
     challenge = construct_challenge(auth_directives)
-    auth_header = construct_header("username", "pswd", challenge)
+    auth_header = build_digest_header('GET', '/v1/hello', challenge, "username", "pswd")
 
     response = await service_client.get(
         '/v1/hello', headers={'Authorization': auth_header},
@@ -210,7 +210,7 @@ async def test_aliving_nonce_after_half_ttl(service_client, mocked_time):
 
     challenge = construct_challenge(
         auth_directives, auth_directives_info['nextnonce'])
-    auth_header = construct_header("username", "pswd", challenge)
+    auth_header = build_digest_header('GET', '/v1/hello', challenge, "username", "pswd")
 
     response = await service_client.get(
         '/v1/hello', headers={'Authorization': auth_header},
@@ -230,7 +230,7 @@ async def test_repeated_auth_ignore_nextnonce(service_client):
     auth_directives_assert(auth_directives)
 
     challenge = construct_challenge(auth_directives)
-    auth_header = construct_header("username", "pswd", challenge)
+    auth_header = build_digest_header('GET', '/v1/hello', challenge, "username", "pswd")
 
     response = await service_client.get(
         '/v1/hello', headers={'Authorization': auth_header},
@@ -244,7 +244,7 @@ async def test_repeated_auth_ignore_nextnonce(service_client):
     auth_directives = parse_directives(authentication_header)
 
     challenge = construct_challenge(auth_directives)
-    auth_header = construct_header("username", "pswd", challenge)
+    auth_header = build_digest_header('GET', '/v1/hello', challenge, "username", "pswd")
 
     response = await service_client.get(
         '/v1/hello', headers={'Authorization': auth_header},

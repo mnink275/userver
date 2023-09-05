@@ -16,7 +16,7 @@ async def test_authenticate_base_proxy(service_client):
     auth_directives_assert(auth_directives) 
 
     challenge = construct_challenge(auth_directives)
-    auth_header = construct_header("username", "pswd", challenge)
+    auth_header = build_digest_header('GET', '/v1/hello', challenge, "username", "pswd")
 
     response = await service_client.get(
         '/v1/hello', headers={'Proxy-Authorization': auth_header},
@@ -36,7 +36,7 @@ async def test_postgres_wrong_data_proxy(service_client):
     auth_directives_assert(auth_directives)
 
     challenge = construct_challenge(auth_directives)
-    auth_header = construct_header("username", "wrong-password", challenge)
+    auth_header = build_digest_header('GET', '/v1/hello', challenge, "username", "wrong-password")
 
     response = await service_client.get(
         '/v1/hello', headers={'Proxy-Authorization': auth_header},

@@ -12,10 +12,6 @@ def construct_challenge(auth_directives: dict, nonce=''):
             'qop': "auth"
             }
 
-# construct authorization header sent from client
-def construct_header(username: str, password: str, challenge: dict):
-    return build_digest_header('GET', '/v1/hello', challenge, username, password)
-
 
 def parse_directives(authentication_header: str):
     return dict(reg.findall(authentication_header))
