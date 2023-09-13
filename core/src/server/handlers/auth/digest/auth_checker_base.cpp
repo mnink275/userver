@@ -83,8 +83,9 @@ AuthCheckerBase::AuthCheckerBase(const AuthCheckerSettings& digest_settings,
       authorization_header_(
           is_proxy_ ? USERVER_NAMESPACE::http::headers::kProxyAuthorization
                     : USERVER_NAMESPACE::http::headers::kAuthorization),
-      authenticate_info_header_(is_proxy_ ? USERVER_NAMESPACE::http::headers::kProxyAuthenticationInfo
-                                          : USERVER_NAMESPACE::http::headers::kAuthenticationInfo),
+      authenticate_info_header_(
+          is_proxy_ ? USERVER_NAMESPACE::http::headers::kProxyAuthenticationInfo
+                    : USERVER_NAMESPACE::http::headers::kAuthenticationInfo),
       unauthorized_status_(is_proxy_
                                ? http::HttpStatus::kProxyAuthenticationRequired
                                : http::HttpStatus::kUnauthorized) {}
@@ -252,9 +253,10 @@ std::string AuthCheckerBase::ConstructResponseDirectives(std::string_view nonce,
       fmt::format("{}={}, ", directives::kStale, stale),
       fmt::format("{}={}, ", directives::kAlgorithm, algorithm_),
       fmt::format("{}=\"{}\"", directives::kQop, qops_));
-  
+
   if (charset_.has_value()) {
-    header_value.append(fmt::format("{}={}", directives::kCharset, charset_.value()));
+    header_value.append(
+        fmt::format("{}={}", directives::kCharset, charset_.value()));
   }
 
   return header_value;
