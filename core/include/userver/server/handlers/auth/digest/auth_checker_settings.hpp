@@ -25,8 +25,7 @@ struct AuthCheckerSettings {
   std::vector<std::string> qops;
   /// If set, the Proxy prefix is inserted into the header of responses
   bool is_proxy{false};
-  /// Enable sessions and session algorithms (MD5-sess, SHA-256-sess and
-  /// SHA-512-256-sess)
+  /// Shows whether session algorithms are enabled
   bool is_session{false};
   /// ttl for `nonce` from
   /// https://datatracker.ietf.org/doc/html/rfc2617#section-3.2.1

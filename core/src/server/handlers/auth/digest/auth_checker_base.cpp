@@ -22,6 +22,7 @@
 #include <userver/server/handlers/fallback_handlers.hpp>
 #include <userver/server/http/http_response.hpp>
 #include <userver/utils/algo.hpp>
+#include <userver/utils/assert.hpp>
 #include <userver/utils/datetime.hpp>
 #include <userver/utils/from_string.hpp>
 
@@ -37,19 +38,25 @@ UserData::UserData(HA1 ha1, std::string nonce, TimePoint timestamp,
       nonce_count(nonce_count) {}
 
 Hasher::Hasher(std::string_view algorithm) {
-  switch (
-      kHashAlgToType.TryFindICase(algorithm).value_or(HashAlgTypes::kUnknown)) {
-    case HashAlgTypes::kMD5:
+  auto algorithm_type = kHashAlgorithmsMap.TryFind(algorithm);
+  if (!algorithm_type.has_value()) {
+    constexpr std::string_view error_msg =
+        "The presence of the algorithm should have been checked in "
+        "digest::AuthCheckerSettingsComponent";
+    UASSERT_MSG(false, error_msg);
+    throw std::runtime_error(fmt::format("Algorithm is not supported: {}. {}",
+                                         algorithm, error_msg));
+  }
+  switch (algorithm_type.value()) {
+    case HashAlgorithmsTypes::kMD5:
       hash_algorithm_ = &crypto::hash::weak::Md5;
       break;
-    case HashAlgTypes::kSHA256:
+    case HashAlgorithmsTypes::kSHA256:
       hash_algorithm_ = &crypto::hash::Sha256;
       break;
-    case HashAlgTypes::kSHA512:
+    case HashAlgorithmsTypes::kSHA512:
       hash_algorithm_ = &crypto::hash::Sha512;
       break;
-    default:
-      throw std::runtime_error("Unknown hash algorithm");
   }
 }
 
@@ -246,17 +253,20 @@ std::string AuthCheckerBase::ConstructResponseDirectives(std::string_view nonce,
                                                          bool stale) const {
   // RFC 2617, 3.2.1
   // Server response directives.
+  auto algorithm = algorithm_;
+  if (is_session_) algorithm.append(kSessSuffix);
+
   auto header_value = utils::StrCat(
       "Digest ", fmt::format("{}=\"{}\", ", directives::kRealm, realm_),
       fmt::format("{}=\"{}\", ", directives::kDomain, domains_),
       fmt::format("{}=\"{}\", ", directives::kNonce, nonce),
       fmt::format("{}={}, ", directives::kStale, stale),
-      fmt::format("{}={}, ", directives::kAlgorithm, algorithm_),
+      fmt::format("{}={}, ", directives::kAlgorithm, algorithm),
       fmt::format("{}=\"{}\"", directives::kQop, qops_));
 
   if (charset_.has_value()) {
     header_value.append(
-        fmt::format("{}={}", directives::kCharset, charset_.value()));
+        fmt::format(", {}={}", directives::kCharset, charset_.value()));
   }
 
   return header_value;

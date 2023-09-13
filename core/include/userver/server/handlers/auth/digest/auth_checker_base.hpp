@@ -130,7 +130,7 @@ class AuthCheckerBase : public auth::AuthCheckerBase {
   const std::optional<std::string>& charset_;
   const std::string realm_;
   const std::string domains_;
-  std::string_view algorithm_;
+  const std::string& algorithm_;
   const bool is_session_;
   const bool is_proxy_;
   const std::chrono::milliseconds nonce_ttl_;

@@ -24,7 +24,9 @@ def construct_header(username: str, password: str, challenge: dict, uri: str):
     digest_auth.init_per_thread_state()
     # pylint: disable=protected-access
     digest_auth._thread_local.chal = challenge
-    return digest_auth.build_digest_header('GET', uri)
+    header = digest_auth.build_digest_header('GET', uri)
+    # assert header == 'this!', f'header value is: {header}'
+    return header
 
 
 def parse_directives(authentication_header: str):
