@@ -19,12 +19,12 @@ def construct_challenge(auth_directives: dict, nonce=''):
 
 
 # construct authorization header sent from client
-def construct_header(username: str, password: str, challenge: dict):
+def construct_header(username: str, password: str, challenge: dict, uri: str):
     digest_auth = HTTPDigestAuth(username, password)
     digest_auth.init_per_thread_state()
     # pylint: disable=protected-access
     digest_auth._thread_local.chal = challenge
-    return digest_auth.build_digest_header('GET', '/v1/hello')
+    return digest_auth.build_digest_header('GET', uri)
 
 
 def parse_directives(authentication_header: str):
