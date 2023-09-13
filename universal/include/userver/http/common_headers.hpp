@@ -103,6 +103,12 @@ inline constexpr PredefinedHeader kWWWAuthenticate{"WWW-Authenticate"};
 inline constexpr PredefinedHeader kProxyAuthenticate{"Proxy-Authenticate"};
 /// @}
 
+/// @name Accepted Authentication Info Headers from rfc7615
+/// @{
+inline constexpr PredefinedHeader kAuthenticationInfo{"Authentication-Info"};
+inline constexpr PredefinedHeader kProxyAuthenticationInfo{"Proxy-Authentication-Info"};
+/// @}
+
 /// @name Response Context
 /// @{
 inline constexpr PredefinedHeader kAcceptRanges{"Accept-Ranges"};

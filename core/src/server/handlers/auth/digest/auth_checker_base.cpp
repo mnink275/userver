@@ -29,10 +29,6 @@ USERVER_NAMESPACE_BEGIN
 
 namespace server::handlers::auth::digest {
 
-constexpr std::string_view kAuthenticationInfo = "Authentication-Info";
-constexpr std::string_view kProxyAuthenticationInfo =
-    "Proxy-Authentication-Info";
-
 UserData::UserData(HA1 ha1, std::string nonce, TimePoint timestamp,
                    std::int64_t nonce_count)
     : ha1(std::move(ha1)),
@@ -86,8 +82,8 @@ AuthCheckerBase::AuthCheckerBase(const AuthCheckerSettings& digest_settings,
       authorization_header_(
           is_proxy_ ? USERVER_NAMESPACE::http::headers::kProxyAuthorization
                     : USERVER_NAMESPACE::http::headers::kAuthorization),
-      authenticate_info_header_(is_proxy_ ? kProxyAuthenticationInfo
-                                          : kAuthenticationInfo),
+      authenticate_info_header_(is_proxy_ ? USERVER_NAMESPACE::http::headers::kProxyAuthenticationInfo
+                                          : USERVER_NAMESPACE::http::headers::kAuthenticationInfo),
       unauthorized_status_(is_proxy_
                                ? http::HttpStatus::kProxyAuthenticationRequired
                                : http::HttpStatus::kUnauthorized) {}
