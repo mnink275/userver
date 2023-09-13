@@ -247,10 +247,10 @@ std::string AuthCheckerBase::ConstructResponseDirectives(std::string_view nonce,
   // Server response directives.
   auto header_value = utils::StrCat(
       "Digest ", fmt::format("{}=\"{}\", ", directives::kRealm, realm_),
-      fmt::format("{}=\"{}\", ", directives::kNonce, nonce),
-      fmt::format("{}=\"{}\", ", directives::kStale, stale),
       fmt::format("{}=\"{}\", ", directives::kDomain, domains_),
-      fmt::format("{}=\"{}\", ", directives::kAlgorithm, algorithm_),
+      fmt::format("{}=\"{}\", ", directives::kNonce, nonce),
+      fmt::format("{}={}, ", directives::kStale, stale),
+      fmt::format("{}={}, ", directives::kAlgorithm, algorithm_),
       fmt::format("{}=\"{}\"", directives::kQop, qops_));
   
   if (charset_.has_value()) {
