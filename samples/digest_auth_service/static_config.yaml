@@ -23,7 +23,7 @@ components_manager:
             is-proxy: true
             is-session: false
             domains:
-              - /v1/hello
+              - /v1/hello-proxy
             nonce-ttl: 1000s
         # /// [digest config]
         # /// [hello config]
