@@ -108,7 +108,7 @@ AuthCheckResult AuthCheckerBase::CheckAuth(const http::HttpRequest& request,
 
     response.SetStatus(unauthorized_status_);
     response.SetHeader(authenticate_header_,
-                       ConstructResponseDirectives(nonce, false));
+                       ConstructResponseDirectives(nonce, true));
 
     PushUnnamedNonce(std::move(nonce));
 
