@@ -148,6 +148,8 @@ AuthCheckResult AuthCheckerBase::CheckAuth(const http::HttpRequest& request,
       return AuthCheckResult{AuthCheckResult::Status::kTokenNotFound};
     case ValidateResult::kOk:
       break;
+    default:
+      UASSERT_MSG(false, "Found unhandled type of ValidateResult enum");
   }
 
   auto digest =
