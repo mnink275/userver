@@ -31,6 +31,9 @@ struct AuthCheckerSettings {
   /// ttl for `nonce` from
   /// https://datatracker.ietf.org/doc/html/rfc2617#section-3.2.1
   std::chrono::milliseconds nonce_ttl{0};
+  /// Used to indecate the encoding scheme server supports
+  /// https://datatracker.ietf.org/doc/html/rfc7616#section-3.3
+  std::optional<std::string> charset;
 };
 
 }  // namespace server::handlers::auth::digest

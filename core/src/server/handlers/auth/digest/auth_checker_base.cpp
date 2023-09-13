@@ -69,6 +69,7 @@ std::string Hasher::GetHash(std::string_view data) const {
 AuthCheckerBase::AuthCheckerBase(const AuthCheckerSettings& digest_settings,
                                  std::string&& realm)
     : qops_(fmt::format("{}", fmt::join(digest_settings.qops, ","))),
+      charset_(digest_settings.charset),
       realm_(std::move(realm)),
       domains_(fmt::format("{}", fmt::join(digest_settings.domains, " "))),
       algorithm_(digest_settings.algorithm),
@@ -244,13 +245,19 @@ std::string AuthCheckerBase::ConstructResponseDirectives(std::string_view nonce,
                                                          bool stale) const {
   // RFC 2617, 3.2.1
   // Server response directives.
-  return utils::StrCat(
+  auto header_value = utils::StrCat(
       "Digest ", fmt::format("{}=\"{}\", ", directives::kRealm, realm_),
       fmt::format("{}=\"{}\", ", directives::kNonce, nonce),
       fmt::format("{}=\"{}\", ", directives::kStale, stale),
       fmt::format("{}=\"{}\", ", directives::kDomain, domains_),
       fmt::format("{}=\"{}\", ", directives::kAlgorithm, algorithm_),
       fmt::format("{}=\"{}\"", directives::kQop, qops_));
+  
+  if (charset_.has_value()) {
+    header_value.append(fmt::format("{}={}", directives::kCharset, charset_.value()));
+  }
+
+  return header_value;
 }
 
 std::string AuthCheckerBase::CalculateDigest(

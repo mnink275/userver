@@ -36,7 +36,9 @@ inline constexpr utils::TrivialBiMap kQopToType = [](auto selector) {
   return selector().Case("auth", QopTypes::kAuth);
 };
 
-// enum
+inline constexpr utils::TrivialSet kSupportedCharsets = [](auto selector) {
+  return selector().Case("UTF-8");
+};
 
 }  // namespace server::handlers::auth::digest
 

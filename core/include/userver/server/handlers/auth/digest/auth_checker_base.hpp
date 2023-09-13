@@ -127,6 +127,7 @@ class AuthCheckerBase : public auth::AuthCheckerBase {
                                       http::HttpResponse& response) const;
 
   const std::string qops_;
+  const std::optional<std::string>& charset_;
   const std::string realm_;
   const std::string domains_;
   std::string_view algorithm_;

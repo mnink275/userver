@@ -49,7 +49,8 @@ class StandAloneCheckerTest : public ::testing::Test {
             std::vector<std::string>{"auth"},  // qops
             false,                             // is_proxy
             false,                             // is_session
-            kNonceTTL                          // nonce_ttl
+            kNonceTTL,                         // nonce_ttl
+            "UTF-8"                            // charset
         }),
         checker_(digest_settings_, "testrealm@host.com"),
         correct_client_context_({

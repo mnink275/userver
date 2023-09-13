@@ -37,3 +37,4 @@ def auth_directives_assert(auth_directives: dict):
     assert 'nonce' in auth_directives
     assert 'algorithm' in auth_directives
     assert 'qop' in auth_directives
+    assert 'charset' in auth_directives

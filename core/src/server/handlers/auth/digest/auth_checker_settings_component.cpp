@@ -42,6 +42,14 @@ AuthCheckerSettingsComponent::AuthCheckerSettingsComponent(
   settings_.is_session = config["is-session"].As<bool>(false);
   settings_.nonce_ttl =
       config["nonce-ttl"].As<std::chrono::milliseconds>(kDefaultTtlMs);
+
+  auto charset_opt = config["charset"].As<std::optional<std::string>>();
+  if (charset_opt.has_value() &&
+      !kSupportedCharsets.Contains(charset_opt.value())) {
+    throw std::runtime_error(
+        fmt::format("charset: {} is not allowed", charset_opt.value()));
+  }
+  settings_.charset = std::move(charset_opt);
 }
 
 AuthCheckerSettingsComponent::~AuthCheckerSettingsComponent() = default;
@@ -84,6 +92,10 @@ properties:
         type: string
         description: ttl for nonce
         defaultDescription: 10s
+    charset:
+        type: string
+        description: ttl for nonce
+        defaultDescription: The only allowed value is "UTF-8"
 )");
 }
 

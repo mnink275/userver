@@ -15,6 +15,7 @@ components_manager:
             domains:
               - /v1/hello
             nonce-ttl: 1000s
+            charset: UTF-8
         # /// [digest config]
         auth-digest-checker-settings-proxy:
             algorithm: MD5
@@ -25,6 +26,7 @@ components_manager:
             domains:
               - /v1/hello-proxy
             nonce-ttl: 1000s
+            charset: UTF-8
         # /// [digest config]
         # /// [hello config]
         handler-hello:
