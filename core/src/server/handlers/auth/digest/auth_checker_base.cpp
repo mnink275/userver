@@ -70,7 +70,7 @@ AuthCheckerBase::AuthCheckerBase(const AuthCheckerSettings& digest_settings,
                                  std::string&& realm)
     : qops_(fmt::format("{}", fmt::join(digest_settings.qops, ","))),
       realm_(std::move(realm)),
-      domains_(fmt::format("{}", fmt::join(digest_settings.domains, ", "))),
+      domains_(fmt::format("{}", fmt::join(digest_settings.domains, " "))),
       algorithm_(digest_settings.algorithm),
       is_session_(digest_settings.is_session),
       is_proxy_(digest_settings.is_proxy),
