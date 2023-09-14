@@ -19,7 +19,7 @@ enum class HashAlgorithmsTypes {
 /// @brief Supported `qop` field values. See 'qop' from
 /// https://datatracker.ietf.org/doc/html/rfc7616#section-3.3
 enum class QopTypes {
-  kAuth,    ///< The value "auth" indicates authentication (default)
+  kAuth,  ///< The value "auth" indicates authentication (default)
 };
 
 /// @cond

@@ -31,7 +31,8 @@ AuthCheckerSettingsComponent::AuthCheckerSettingsComponent(
     settings_.is_session = true;
   }
   if (!kHashAlgorithmsMap.TryFind(algorithm).has_value()) {
-    throw std::runtime_error("Algorithm is not supported: " + parsed_algorithm);
+    throw std::runtime_error(
+        fmt::format("Algorithm '{}' is not supported", parsed_algorithm));
   }
   settings_.algorithm = algorithm;
 
@@ -42,7 +43,7 @@ AuthCheckerSettingsComponent::AuthCheckerSettingsComponent(
   // Check for valid qops
   for (const auto& qop : settings_.qops) {
     if (!kQopToType.TryFindICase(qop).has_value()) {
-      throw std::runtime_error("Qop is not supported: " + qop);
+      throw std::runtime_error(fmt::format("Qop '{}' is not supported", qop));
     }
   }
 
@@ -54,7 +55,7 @@ AuthCheckerSettingsComponent::AuthCheckerSettingsComponent(
   if (charset_opt.has_value() &&
       !kSupportedCharsets.Contains(charset_opt.value())) {
     throw std::runtime_error(
-        fmt::format("charset: {} is not allowed", charset_opt.value()));
+        fmt::format("charset '{}' is not allowed", charset_opt.value()));
   }
   settings_.charset = std::move(charset_opt);
 }
@@ -80,10 +81,10 @@ properties:
       defaultDescription: all URIs (i.e. "/")
       items:
           type: string
-          description: domain name
+          description: list of URIs in the same protection space
     qops:
       type: array
-      description: qop-options
+      description: quality of protection
       items:
           type: string
           description: qop name
@@ -93,11 +94,11 @@ properties:
       defaultDescription: false
     nonce-ttl:
         type: string
-        description: ttl for nonce
+        description: TTL for nonces
         defaultDescription: 10s
     charset:
         type: string
-        description: ttl for nonce
+        description: optional, indicates the encoding scheme server supports
         defaultDescription: The only allowed value is "UTF-8"
 )");
 }

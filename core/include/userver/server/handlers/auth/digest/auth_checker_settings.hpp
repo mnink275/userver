@@ -12,18 +12,23 @@ USERVER_NAMESPACE_BEGIN
 
 namespace server::handlers::auth::digest {
 
-/// @brief The structure that the `server::handlers::auth::digest::AuthCheckerSettingsComponent`
-// uses to store settings received from the `static_config.yaml` for the digest-authentication checkers derived from `server::handlers::auth::digest::AuthCheckerBase`.
-// You can read more about the fields here: https://datatracker.ietf.org/doc/html/rfc7616#section-3.3
+/// @brief The structure that the
+/// `server::handlers::auth::digest::AuthCheckerSettingsComponent`
+/// uses to store settings received from the `static_config.yaml` for the
+/// digest-authentication checkers derived from
+/// `server::handlers::auth::digest::AuthCheckerBase`. You can read more about
+/// the fields here: https://datatracker.ietf.org/doc/html/rfc7616#section-3.3
 struct AuthCheckerSettings {
   /// A string indicating an algorithm used to produce the digest.
   std::string algorithm;
   /// Space-separated list of URIs that define the protection space
   std::vector<std::string> domain;
-  /// Array of one or more tokens indicating the "quality of protection" values supported by the server.
+  /// Array of one or more tokens indicating the "quality of protection" values
+  /// supported by the server.
   std::vector<std::string> qops;
-  /// Used to indicate that the authentication server is a proxy. Affects the headers used for authentication.
-  /// See: https://datatracker.ietf.org/doc/html/rfc7616#section-3.8
+  /// Used to indicate that the authentication server is a proxy. Affects the
+  /// headers used for authentication. See:
+  /// https://datatracker.ietf.org/doc/html/rfc7616#section-3.8
   bool is_proxy{false};
   /// Shows whether algorithm Session variant is enabled
   bool is_session{false};

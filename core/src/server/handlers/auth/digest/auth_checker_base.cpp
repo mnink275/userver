@@ -283,16 +283,16 @@ std::string AuthCheckerBase::CalculateDigest(
     // If algorithm Session variant enabled, then A1 is calculated using the
     // 'nonce' and 'cnonce' values.
     // https://datatracker.ietf.org/doc/html/rfc7616#section-3.4.2
-    ha1.append(fmt::format("{}:{}", client_context.nonce,
-                      client_context.cnonce));
+    ha1.append(
+        fmt::format("{}:{}", client_context.nonce, client_context.cnonce));
   }
 
   auto a2 = fmt::format("{}:{}", ToString(request_method), client_context.uri);
   auto ha2 = digest_hasher_.GetHash(a2);
 
-  auto digest = fmt::format(
-      "{}:{}:{}:{}:{}:{}", ha1, client_context.nonce, client_context.nc,
-      client_context.cnonce, client_context.qop, ha2);
+  auto digest = fmt::format("{}:{}:{}:{}:{}:{}", ha1, client_context.nonce,
+                            client_context.nc, client_context.cnonce,
+                            client_context.qop, ha2);
   return digest_hasher_.GetHash(digest);
 }
 
