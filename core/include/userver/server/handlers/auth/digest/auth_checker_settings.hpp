@@ -18,8 +18,9 @@ struct AuthCheckerSettings {
   /// Algorithm for hashing `nonce` from
   /// https://datatracker.ietf.org/doc/html/rfc2617#section-3.2.1
   std::string algorithm;
-  /// `domains` from https://datatracker.ietf.org/doc/html/rfc2617#section-3.2.1
-  std::vector<std::string> domains;
+  /// Space-separated list of URIs that define the protection space
+  /// See: https://datatracker.ietf.org/doc/html/rfc7616#section-3.3
+  std::vector<std::string> domain;
   /// `qop-options` from
   /// https://datatracker.ietf.org/doc/html/rfc2617#section-3.2.1
   std::vector<std::string> qops;

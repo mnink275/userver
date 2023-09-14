@@ -129,7 +129,7 @@ class AuthCheckerBase : public auth::AuthCheckerBase {
   const std::string qops_;
   const std::optional<std::string>& charset_;
   const std::string realm_;
-  const std::string domains_;
+  const std::string domain_;
   const std::string& algorithm_;
   const bool is_session_;
   const bool is_proxy_;

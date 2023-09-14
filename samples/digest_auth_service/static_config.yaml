@@ -11,7 +11,7 @@ components_manager:
             qops:
               - auth
             is-proxy: false
-            domains:
+            domain:
               - /v1/hello
             nonce-ttl: 1000s
             charset: UTF-8
@@ -21,7 +21,7 @@ components_manager:
             qops:
               - auth
             is-proxy: true
-            domains:
+            domain:
               - /v1/hello-proxy
             nonce-ttl: 1000s
             charset: UTF-8

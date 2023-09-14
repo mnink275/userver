@@ -27,7 +27,7 @@ namespace server::handlers::auth::digest {
 /// Name       | Description                                    | Default value
 /// ---------- | ---------------------------------------------- | -------------
 /// algorithm  | Hashing algorithms. You can use Session variant with `-sess` suffix (e.g. SHA-265-sess). | SHA-256
-/// domains    | list of URIs, that define the protection space | /
+/// domain     | List of URIs, that define the protection space | /
 /// qops       | list of supported qop-options. Use `auth` for authentication and `auth-in` for authentication with integrity protection | auth
 /// nonce-ttl  | ttl for nonce | 10s
 

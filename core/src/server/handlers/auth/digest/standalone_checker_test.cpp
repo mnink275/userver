@@ -45,7 +45,7 @@ class StandAloneCheckerTest : public ::testing::Test {
   StandAloneCheckerTest()
       : digest_settings_({
             "MD5",                             // algorithm
-            std::vector<std::string>{"/"},     // domains
+            std::vector<std::string>{"/"},     // domain
             std::vector<std::string>{"auth"},  // qops
             false,                             // is_proxy
             false,                             // is_session

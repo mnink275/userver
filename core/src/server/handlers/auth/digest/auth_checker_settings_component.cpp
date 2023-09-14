@@ -35,7 +35,7 @@ AuthCheckerSettingsComponent::AuthCheckerSettingsComponent(
   }
   settings_.algorithm = algorithm;
 
-  settings_.domains = config["domains"].As<std::vector<std::string>>(
+  settings_.domain = config["domain"].As<std::vector<std::string>>(
       std::vector<std::string>{"/"});
   settings_.qops = config["qops"].As<std::vector<std::string>>(
       std::vector<std::string>{"auth"});
@@ -74,10 +74,10 @@ properties:
     algorithm:
       type: string
       description: algorithm for hashing nonce
-    domains:
+    domain:
       type: array
-      description: domains for use
-      defaultDescription: /
+      description: space-separated list of URIs that define the protection space
+      defaultDescription: all URIs (i.e. "/")
       items:
           type: string
           description: domain name
