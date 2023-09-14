@@ -161,9 +161,10 @@ AuthCheckResult AuthCheckerBase::CheckAuth(const http::HttpRequest& request,
       UASSERT_MSG(false, "Found unhandled type of ValidateResult enum");
   }
 
+  // Server MUST perform the same digest operation (e.g. SHA-256) performed
+  // by the client and compare the result to the given `response` value.
   auto digest =
       CalculateDigest(user_data.ha1, request.GetMethod(), client_context);
-
   if (!crypto::algorithm::AreStringsEqualConstTime(digest,
                                                    client_context.response)) {
     response.SetStatus(unauthorized_status_);
@@ -172,9 +173,9 @@ AuthCheckResult AuthCheckerBase::CheckAuth(const http::HttpRequest& request,
     return AuthCheckResult{AuthCheckResult::Status::kInvalidToken};
   }
 
-  // RFC 2617, 3.2.3
   // Authentication-Info contains the "nextnonce" required for subsequent
   // authentication.
+  // https://datatracker.ietf.org/doc/html/rfc7616#section-3.5
   auto info_header_directives = ConstructAuthInfoHeader(client_context, etag);
   response.SetHeader(authenticate_info_header_, info_header_directives);
 
@@ -251,8 +252,8 @@ AuthCheckResult AuthCheckerBase::StartNewAuthSession(
 
 std::string AuthCheckerBase::ConstructResponseDirectives(std::string_view nonce,
                                                          bool stale) const {
-  // RFC 2617, 3.2.1
-  // Server response directives.
+  // The WWW-Authenticate Response Header Field.
+  // https://datatracker.ietf.org/doc/html/rfc7616#section-3.3
   auto algorithm = algorithm_;
   if (is_session_) algorithm.append(kSessSuffix);
 
@@ -275,20 +276,24 @@ std::string AuthCheckerBase::ConstructResponseDirectives(std::string_view nonce,
 std::string AuthCheckerBase::CalculateDigest(
     const UserData::HA1& ha1_non_loggable, http::HttpMethod request_method,
     const ContextFromClient& client_context) const {
-  // RFC 2617, 3.2.2.1 Request-Digest
+  // 'digest' value is calculated in the same way as 'response'
+  // https://datatracker.ietf.org/doc/html/rfc7616#section-3.4.1
   auto ha1 = ha1_non_loggable.GetUnderlying();
   if (is_session_) {
-    ha1 = fmt::format("{}:{}:{}", ha1, client_context.nonce,
-                      client_context.cnonce);
+    // If algorithm Session variant enabled, then A1 is calculated using the
+    // 'nonce' and 'cnonce' values.
+    // https://datatracker.ietf.org/doc/html/rfc7616#section-3.4.2
+    ha1.append(fmt::format("{}:{}", client_context.nonce,
+                      client_context.cnonce));
   }
 
   auto a2 = fmt::format("{}:{}", ToString(request_method), client_context.uri);
   auto ha2 = digest_hasher_.GetHash(a2);
 
-  auto request_digest = fmt::format(
+  auto digest = fmt::format(
       "{}:{}:{}:{}:{}:{}", ha1, client_context.nonce, client_context.nc,
       client_context.cnonce, client_context.qop, ha2);
-  return digest_hasher_.GetHash(request_digest);
+  return digest_hasher_.GetHash(digest);
 }
 
 }  // namespace server::handlers::auth::digest

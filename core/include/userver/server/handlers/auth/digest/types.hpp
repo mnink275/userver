@@ -16,12 +16,10 @@ enum class HashAlgorithmsTypes {
   kSHA512,  ///< SHA-512 algorithm
 };
 
-/// @brief Supported `qop-options` from
-/// https://datatracker.ietf.org/doc/html/rfc2617#section-3.2.1
+/// @brief Supported `qop` field values. See 'qop' from
+/// https://datatracker.ietf.org/doc/html/rfc7616#section-3.3
 enum class QopTypes {
-  kAuth,    ///< `The value "auth" indicates authentication` from
-            ///< https://datatracker.ietf.org/doc/html/rfc2617#section-3.2.1
-  kUnknown  ///< Unknown qop-value
+  kAuth,    ///< The value "auth" indicates authentication (default)
 };
 
 /// @cond

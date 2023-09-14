@@ -16,7 +16,7 @@ is passed to the HTTP handler.
 Authentication credentials checking logic is set in base class `server::handlers::auth::digest::AuthChecker`.
 This sample simply defines derived class `samples::digest_auth::AuthChecker`, that can operate with user data and unnamed nonce pool.
 Digest authentication logic and hashing logic is out of scope of this tutorial.
-For reference, read [RFC2617](https://datatracker.ietf.org/doc/html/rfc2617).
+For reference, read [RFC7616](https://datatracker.ietf.org/doc/html/rfc7616).
 
 
 ### PostgreSQL Table

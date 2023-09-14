@@ -12,27 +12,24 @@ USERVER_NAMESPACE_BEGIN
 
 namespace server::handlers::auth::digest {
 
-/// @brief Struct of directives for digest authentication server settings per
-/// RFC 2617
+/// @brief The structure that the `server::handlers::auth::digest::AuthCheckerSettingsComponent`
+// uses to store settings received from the `static_config.yaml` for the digest-authentication checkers derived from `server::handlers::auth::digest::AuthCheckerBase`.
+// You can read more about the fields here: https://datatracker.ietf.org/doc/html/rfc7616#section-3.3
 struct AuthCheckerSettings {
-  /// Algorithm for hashing `nonce` from
-  /// https://datatracker.ietf.org/doc/html/rfc2617#section-3.2.1
+  /// A string indicating an algorithm used to produce the digest.
   std::string algorithm;
   /// Space-separated list of URIs that define the protection space
-  /// See: https://datatracker.ietf.org/doc/html/rfc7616#section-3.3
   std::vector<std::string> domain;
-  /// `qop-options` from
-  /// https://datatracker.ietf.org/doc/html/rfc2617#section-3.2.1
+  /// Array of one or more tokens indicating the "quality of protection" values supported by the server.
   std::vector<std::string> qops;
-  /// If set, the Proxy prefix is inserted into the header of responses
+  /// Used to indicate that the authentication server is a proxy. Affects the headers used for authentication.
+  /// See: https://datatracker.ietf.org/doc/html/rfc7616#section-3.8
   bool is_proxy{false};
-  /// Shows whether session algorithms are enabled
+  /// Shows whether algorithm Session variant is enabled
   bool is_session{false};
-  /// ttl for `nonce` from
-  /// https://datatracker.ietf.org/doc/html/rfc2617#section-3.2.1
+  /// TTL for nonces.
   std::chrono::milliseconds nonce_ttl{0};
-  /// Used to indecate the encoding scheme server supports
-  /// https://datatracker.ietf.org/doc/html/rfc7616#section-3.3
+  /// Used to indicate the encoding scheme server supports.
   std::optional<std::string> charset;
 };
 
