@@ -36,16 +36,19 @@ AuthCheckerSettingsComponent::AuthCheckerSettingsComponent(
   }
   settings_.algorithm = algorithm;
 
-  settings_.domain = config["domain"].As<std::vector<std::string>>(
+  auto domains = config["domain"].As<std::vector<std::string>>(
       std::vector<std::string>{"/"});
-  settings_.qops = config["qops"].As<std::vector<std::string>>(
+  settings_.domain = fmt::format("{}", fmt::join(domains, " "));
+
+  auto qops = config["qops"].As<std::vector<std::string>>(
       std::vector<std::string>{"auth"});
   // Check for valid qops
-  for (const auto& qop : settings_.qops) {
+  for (const auto& qop : qops) {
     if (!kQopToType.TryFindICase(qop).has_value()) {
       throw std::runtime_error(fmt::format("Qop '{}' is not supported", qop));
     }
   }
+  settings_.qop = fmt::format("{}", fmt::join(qops, ","));
 
   settings_.is_proxy = config["is-proxy"].As<bool>(false);
   settings_.nonce_ttl =

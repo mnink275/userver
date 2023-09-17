@@ -19,6 +19,7 @@
 #include <userver/server/http/http_response.hpp>
 #include <userver/server/http/http_status.hpp>
 #include <userver/server/request/request_context.hpp>
+#include "userver/http/predefined_header.hpp"
 
 USERVER_NAMESPACE_BEGIN
 
@@ -126,22 +127,25 @@ class AuthCheckerBase : public auth::AuthCheckerBase {
                                       bool stale,
                                       http::HttpResponse& response) const;
 
-  const std::string qops_;
-  const std::optional<std::string>& charset_;
   const std::string realm_;
-  const std::string domain_;
+
+  const std::string& domain_;
+  const std::string& qop_;
+  const std::chrono::milliseconds nonce_ttl_;
+  const std::optional<std::string>& charset_;
   const std::string& algorithm_;
   const bool is_session_;
   const bool is_proxy_;
   const bool userhash_;
-  const std::chrono::milliseconds nonce_ttl_;
+
+  const http::HttpStatus unauthorized_status_;
+
+  using PredefinedHeader = USERVER_NAMESPACE::http::headers::PredefinedHeader;
+  const PredefinedHeader& authenticate_header_;
+  const PredefinedHeader& authorization_header_;
+  const PredefinedHeader& authenticate_info_header_;
 
   const Hasher digest_hasher_;
-
-  const std::string authenticate_header_;
-  const std::string authorization_header_;
-  const std::string authenticate_info_header_;
-  const http::HttpStatus unauthorized_status_;
 };
 
 }  // namespace server::handlers::auth::digest

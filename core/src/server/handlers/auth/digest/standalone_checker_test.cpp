@@ -44,14 +44,14 @@ class StandAloneCheckerTest : public ::testing::Test {
  public:
   StandAloneCheckerTest()
       : digest_settings_({
-            "MD5",                             // algorithm
-            std::vector<std::string>{"/"},     // domain
-            std::vector<std::string>{"auth"},  // qops
-            false,                             // is_proxy
-            false,                             // is_session
-            kNonceTTL,                         // nonce_ttl
-            "UTF-8",                           // charset
-            false                              // userhash
+            "/",        // domain
+            "auth",     // qop
+            kNonceTTL,  // nonce_ttl
+            "UTF-8",    // charset
+            "MD5",      // algorithm
+            false,      // is_proxy
+            false,      // is_session
+            false       // userhash
         }),
         checker_(digest_settings_, "testrealm@host.com"),
         correct_client_context_({

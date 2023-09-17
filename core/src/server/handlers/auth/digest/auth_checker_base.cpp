@@ -75,16 +75,18 @@ std::string Hasher::GetHash(std::string_view data) const {
 
 AuthCheckerBase::AuthCheckerBase(const AuthCheckerSettings& digest_settings,
                                  std::string&& realm)
-    : qops_(fmt::format("{}", fmt::join(digest_settings.qops, ","))),
+    : realm_(std::move(realm)),
+      domain_(digest_settings.domain),
+      qop_(digest_settings.qop),
+      nonce_ttl_(digest_settings.nonce_ttl),
       charset_(digest_settings.charset),
-      realm_(std::move(realm)),
-      domain_(fmt::format("{}", fmt::join(digest_settings.domain, " "))),
       algorithm_(digest_settings.algorithm),
       is_session_(digest_settings.is_session),
       is_proxy_(digest_settings.is_proxy),
       userhash_(digest_settings.userhash),
-      nonce_ttl_(digest_settings.nonce_ttl),
-      digest_hasher_(algorithm_),
+      unauthorized_status_(is_proxy_
+                               ? http::HttpStatus::kProxyAuthenticationRequired
+                               : http::HttpStatus::kUnauthorized),
       authenticate_header_(
           is_proxy_ ? USERVER_NAMESPACE::http::headers::kProxyAuthenticate
                     : USERVER_NAMESPACE::http::headers::kWWWAuthenticate),
@@ -94,9 +96,7 @@ AuthCheckerBase::AuthCheckerBase(const AuthCheckerSettings& digest_settings,
       authenticate_info_header_(
           is_proxy_ ? USERVER_NAMESPACE::http::headers::kProxyAuthenticationInfo
                     : USERVER_NAMESPACE::http::headers::kAuthenticationInfo),
-      unauthorized_status_(is_proxy_
-                               ? http::HttpStatus::kProxyAuthenticationRequired
-                               : http::HttpStatus::kUnauthorized) {}
+      digest_hasher_(algorithm_) {}
 
 AuthCheckerBase::~AuthCheckerBase() = default;
 
@@ -142,7 +142,8 @@ AuthCheckResult AuthCheckerBase::CheckAuth(const http::HttpRequest& request,
   if (userhash_ && client_context.userhash) {
     // username = H( unq(username) ":" unq(realm) )
     // See: https://datatracker.ietf.org/doc/html/rfc7616#section-3.4.4
-    username = digest_hasher_.GetHash(fmt::format("{}:{}", username, client_context.realm));
+    username = digest_hasher_.GetHash(
+        fmt::format("{}:{}", username, client_context.realm));
   } else {
     username = client_context.username;
   }
@@ -272,14 +273,13 @@ std::string AuthCheckerBase::ConstructResponseDirectives(std::string_view nonce,
       fmt::format("{}=\"{}\", ", directives::kNonce, nonce),
       fmt::format("{}={}, ", directives::kStale, stale),
       fmt::format("{}={}, ", directives::kAlgorithm, algorithm),
-      fmt::format("{}=\"{}\"", directives::kQop, qops_));
+      fmt::format("{}=\"{}\"", directives::kQop, qop_));
 
   if (charset_.has_value()) {
     header_value.append(
         fmt::format(", {}={}", directives::kCharset, charset_.value()));
   }
-  header_value.append(
-        fmt::format(", {}={}", directives::kUserhash, userhash_));
+  header_value.append(fmt::format(", {}={}", directives::kUserhash, userhash_));
 
   return header_value;
 }
