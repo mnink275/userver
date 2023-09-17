@@ -11,20 +11,19 @@ namespace server::handlers::auth::digest {
 
 /// WWW-Authenticate header from server response
 /// realm, nonce directives are mandatory
-/// domain, opaque, stale, algorithm, qop, auth-param directives are optional
+/// domain, opaque, stale, algorithm, qop directives are optional
 struct ContextFromServer {
   std::string realm;
   std::string nonce;
   std::string algorithm;
   bool stale{false};
-  std::string authparam;
   std::string qop;
   std::string opaque;
 };
 
 /// Authorization header from client request
 /// username, realm, nonce, digest-uri directives response are mandatory
-/// algorithm, cnonce, opaque, qop, nc, userhash, auth-param directives are optional
+/// algorithm, cnonce, opaque, qop, nc, userhash directives are optional
 struct ContextFromClient {
   std::string username;
   std::string realm;
@@ -37,7 +36,6 @@ struct ContextFromClient {
   std::string qop;
   std::string nc;
   bool userhash{false};
-  std::string authparam;
 };
 
 /// Number of mandatory directives in Authorization header.

@@ -31,7 +31,6 @@ enum class kClientDirectiveTypes {
   kQop,
   kNonceCount,
   kUserhash,
-  kAuthParam,
   kUnknown
 };
 
@@ -47,8 +46,7 @@ const utils::TrivialBiMap kClientDirectivesMap = [](auto selector) {
       .Case(directives::kOpaque, kClientDirectiveTypes::kOpaque)
       .Case(directives::kQop, kClientDirectiveTypes::kQop)
       .Case(directives::kNonceCount, kClientDirectiveTypes::kNonceCount)
-      .Case(directives::kUserhash, kClientDirectiveTypes::kUserhash)
-      .Case(directives::kAuthParam, kClientDirectiveTypes::kAuthParam);
+      .Case(directives::kUserhash, kClientDirectiveTypes::kUserhash);
 };
 
 const std::array<kClientDirectiveTypes, kClientMandatoryDirectivesNumber>
@@ -218,9 +216,6 @@ void Parser::PushToClientContext(std::string&& directive, std::string&& value,
         LOG_ERROR() << ex;
         throw ParseException("Wrong userhash field value format");
       }
-      break;
-    case kClientDirectiveTypes::kAuthParam:
-      client_context.authparam = std::move(value);
       break;
     case kClientDirectiveTypes::kUnknown:
       throw ParseException("Unknown directive found");

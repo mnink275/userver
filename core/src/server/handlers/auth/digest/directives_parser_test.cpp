@@ -53,7 +53,6 @@ algorithm=MD5
   EXPECT_TRUE(auth_context.nc.empty());
   EXPECT_TRUE(auth_context.cnonce.empty());
   EXPECT_TRUE(auth_context.qop.empty());
-  EXPECT_TRUE(auth_context.authparam.empty());
 }
 
 TEST(DirectivesParser, WithAllOptionalDirectives) {
@@ -68,8 +67,7 @@ nc=00000001,
 cnonce="c0ae824f6138e54fb855266ddbda1256",
 response="6629fae49393a05397450978507c4ef1",
 opaque="5ccc069c403ebaf9f0171e9517f40e41",
-userhash=true,
-auth-param="fictional parameter"
+userhash=true
 )";
   Parser parser;
   ContextFromClient auth_context;
@@ -86,7 +84,6 @@ auth-param="fictional parameter"
   EXPECT_EQ(auth_context.cnonce, "c0ae824f6138e54fb855266ddbda1256");
   EXPECT_EQ(auth_context.qop, "auth");
   EXPECT_EQ(auth_context.userhash, true);
-  EXPECT_EQ(auth_context.authparam, "fictional parameter");
 }
 
 TEST(DirectivesParser, MandatoryRealmDirectiveMissing) {
@@ -99,8 +96,7 @@ qop=auth,
 nc=00000001,
 cnonce="c0ae824f6138e54fb855266ddbda1256",
 response="6629fae49393a05397450978507c4ef1",
-opaque="5ccc069c403ebaf9f0171e9517f40e41",
-auth-param="fictional parameter"
+opaque="5ccc069c403ebaf9f0171e9517f40e41"
 )";
   Parser parser;
   try {
@@ -123,8 +119,7 @@ qop=auth,
 nc=00000001,
 cnonce="c0ae824f6138e54fb855266ddbda1256",
 response="6629fae49393a05397450978507c4ef1",
-opaque="5ccc069c403ebaf9f0171e9517f40e41",
-auth-param="fictional parameter"
+opaque="5ccc069c403ebaf9f0171e9517f40e41"
 )";
   Parser parser;
   try {

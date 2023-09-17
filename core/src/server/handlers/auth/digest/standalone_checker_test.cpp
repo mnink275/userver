@@ -65,8 +65,7 @@ class StandAloneCheckerTest : public ::testing::Test {
             "5ccc069c403ebaf9f0171e9517f40e41",  // opaque
             "auth",                              // qop
             "00000001",                          // nc
-            true,                                // userhash
-            "auth-param"                         // authparam
+            true                                 // userhash
         }) {
     client_context_ = correct_client_context_;
   }
