@@ -256,9 +256,10 @@ TEST(FromString, StringViewToBool) {
   CheckConverts("false", false);
   CheckConverts("0", false);
 
-  TestInvalid<bool>("awrawr");
+  TestInvalid<bool>("smtg-wrong");
   TestInvalid<bool>(" true");
   TestInvalid<bool>("true ");
+  TestInvalid<bool>("42");
 }
 
 USERVER_NAMESPACE_END

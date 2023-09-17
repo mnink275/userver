@@ -34,7 +34,7 @@ struct AuthCheckerSettings {
   /// headers used for authentication. See:
   /// https://datatracker.ietf.org/doc/html/rfc7616#section-3.8
   bool is_proxy{false};
-  /// Shows whether algorithm Session variant is enabled
+  /// Shows whether algorithm Session variant is enabled.
   bool is_session{false};
   /// Used to indicate that server supports username hashing.
   bool userhash{false};

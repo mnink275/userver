@@ -38,8 +38,5 @@ struct ContextFromClient {
   bool userhash{false};
 };
 
-/// Number of mandatory directives in Authorization header.
-inline constexpr std::size_t kClientMandatoryDirectivesNumber = 5;
-
 }  // namespace server::handlers::auth::digest
 USERVER_NAMESPACE_END

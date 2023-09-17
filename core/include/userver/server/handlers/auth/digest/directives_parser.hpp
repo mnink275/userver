@@ -28,7 +28,8 @@ class Parser final {
   void CheckMandatoryDirectivesPresent() const;
   void CheckDuplicateDirectivesExist() const;
 
-  constexpr static auto kClientDirectivesCount = boost::pfr::tuple_size_v<ContextFromClient>;
+  constexpr static auto kClientDirectivesCount =
+      boost::pfr::tuple_size_v<ContextFromClient>;
   std::array<std::size_t, kClientDirectivesCount> directives_counter_{};
 };
 

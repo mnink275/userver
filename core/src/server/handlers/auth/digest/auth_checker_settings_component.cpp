@@ -20,7 +20,6 @@ AuthCheckerSettingsComponent::AuthCheckerSettingsComponent(
     const components::ComponentContext& context)
     : components::LoggableComponentBase(config, context) {
   // Reading config values from static config
-  // Check for valid algorithms
   auto parsed_algorithm = config["algorithm"].As<std::string>("SHA-256");
 
   std::string_view algorithm = parsed_algorithm;
@@ -38,17 +37,16 @@ AuthCheckerSettingsComponent::AuthCheckerSettingsComponent(
 
   auto domains = config["domain"].As<std::vector<std::string>>(
       std::vector<std::string>{"/"});
-  settings_.domain = fmt::format("{}", fmt::join(domains, " "));
+  settings_.domain = fmt::format("{}", fmt::join(std::move(domains), " "));
 
-  auto qops = config["qops"].As<std::vector<std::string>>(
+  auto qops = config["qop"].As<std::vector<std::string>>(
       std::vector<std::string>{"auth"});
-  // Check for valid qops
   for (const auto& qop : qops) {
     if (!kQopToType.TryFindICase(qop).has_value()) {
       throw std::runtime_error(fmt::format("Qop '{}' is not supported", qop));
     }
   }
-  settings_.qop = fmt::format("{}", fmt::join(qops, ","));
+  settings_.qop = fmt::format("{}", fmt::join(std::move(qops), ","));
 
   settings_.is_proxy = config["is-proxy"].As<bool>(false);
   settings_.nonce_ttl =
@@ -87,7 +85,7 @@ properties:
       items:
           type: string
           description: list of URIs in the same protection space
-    qops:
+    qop:
       type: array
       description: quality of protection
       items:
@@ -107,7 +105,7 @@ properties:
         defaultDescription: The only allowed value is "UTF-8"
     userhash:
         type: boolean
-        description: optional, indicates the encoding scheme server supports
+        description: optional, indicates that the username has been hashed by client
         defaultDescription: false
 )");
 }

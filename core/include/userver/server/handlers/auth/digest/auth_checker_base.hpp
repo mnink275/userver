@@ -12,6 +12,7 @@
 #include <string_view>
 
 #include <userver/crypto/hash.hpp>
+#include <userver/http/predefined_header.hpp>
 #include <userver/rcu/rcu_map.hpp>
 #include <userver/server/handlers/auth/digest/auth_checker_settings.hpp>
 #include <userver/server/handlers/auth/digest/directives_parser.hpp>
@@ -19,7 +20,6 @@
 #include <userver/server/http/http_response.hpp>
 #include <userver/server/http/http_status.hpp>
 #include <userver/server/request/request_context.hpp>
-#include "userver/http/predefined_header.hpp"
 
 USERVER_NAMESPACE_BEGIN
 

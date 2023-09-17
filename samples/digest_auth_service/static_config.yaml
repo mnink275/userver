@@ -8,7 +8,7 @@ components_manager:
         # /// [digest config]
         auth-digest-checker-settings:
             algorithm: SHA-256
-            qops:
+            qop:
               - auth
             is-proxy: false
             domain:
@@ -19,7 +19,7 @@ components_manager:
         # /// [digest config]
         auth-digest-checker-settings-proxy:
             algorithm: SHA-256
-            qops:
+            qop:
               - auth
             is-proxy: true
             domain:

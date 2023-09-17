@@ -19,9 +19,8 @@ nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093",
 uri="/dir/index.html",
 response="6629fae49393a05397450978507c4ef1"
 )";
-  Parser parser;
   ContextFromClient auth_context;
-  EXPECT_NO_THROW(auth_context = parser.ParseAuthInfo(directives_str));
+  EXPECT_NO_THROW(auth_context = Parser{}.ParseAuthInfo(directives_str));
 
   EXPECT_EQ(auth_context.username, "Mufasa");
   EXPECT_EQ(auth_context.realm, "testrealm@host.com");
@@ -39,9 +38,8 @@ uri="/dir/index.html",
 response="6629fae49393a05397450978507c4ef1",
 algorithm=MD5
 )";
-  Parser parser;
   ContextFromClient auth_context;
-  EXPECT_NO_THROW(auth_context = parser.ParseAuthInfo(directives_str));
+  EXPECT_NO_THROW(auth_context = Parser{}.ParseAuthInfo(directives_str));
 
   EXPECT_EQ(auth_context.username, "Mufasa");
   EXPECT_EQ(auth_context.realm, "testrealm@host.com");
@@ -69,9 +67,8 @@ response="6629fae49393a05397450978507c4ef1",
 opaque="5ccc069c403ebaf9f0171e9517f40e41",
 userhash=true
 )";
-  Parser parser;
   ContextFromClient auth_context;
-  EXPECT_NO_THROW(auth_context = parser.ParseAuthInfo(directives_str));
+  EXPECT_NO_THROW(auth_context = Parser{}.ParseAuthInfo(directives_str));
 
   EXPECT_EQ(auth_context.username, "Mufasa");
   EXPECT_EQ(auth_context.nonce, "dcd98b7102dd2f0e8b11d0f600bfb0c093");
@@ -98,9 +95,8 @@ cnonce="c0ae824f6138e54fb855266ddbda1256",
 response="6629fae49393a05397450978507c4ef1",
 opaque="5ccc069c403ebaf9f0171e9517f40e41"
 )";
-  Parser parser;
   try {
-    parser.ParseAuthInfo(directives_str);
+    Parser{}.ParseAuthInfo(directives_str);
   } catch (const MissingDirectivesException& ex) {
     const auto& missing_directives = ex.GetMissingDirectives();
     EXPECT_EQ(missing_directives.size(), 1);
@@ -121,9 +117,8 @@ cnonce="c0ae824f6138e54fb855266ddbda1256",
 response="6629fae49393a05397450978507c4ef1",
 opaque="5ccc069c403ebaf9f0171e9517f40e41"
 )";
-  Parser parser;
   try {
-    parser.ParseAuthInfo(directives_str);
+    Parser{}.ParseAuthInfo(directives_str);
   } catch (const MissingDirectivesException& ex) {
     const auto& missing_directives = ex.GetMissingDirectives();
     EXPECT_EQ(missing_directives.size(), 4);
@@ -155,8 +150,7 @@ nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093",
 uri="/dir/index.html",
 response="6629fae49393a05397450978507c4ef1"
 )";
-  Parser parser;
-  EXPECT_THROW(parser.ParseAuthInfo(directives_str), ParseException);
+  EXPECT_THROW(Parser{}.ParseAuthInfo(directives_str), ParseException);
 }
 
 TEST(DirectivesParser, UnknownDirective) {
@@ -168,8 +162,7 @@ uri="/dir/index.html",
 response="6629fae49393a05397450978507c4ef1",
 unknown="some-value"
 )";
-  Parser parser;
-  EXPECT_THROW(parser.ParseAuthInfo(directives_str), ParseException);
+  EXPECT_THROW(Parser{}.ParseAuthInfo(directives_str), ParseException);
 }
 
 TEST(DirectivesParser, InvalidMandatoryDirective) {
@@ -180,8 +173,7 @@ uri="/dir/index.html",
 algorithm=MD5,
 response="6629fae49393a05397450978507c4ef1"
 )";
-  Parser parser;
-  EXPECT_THROW(parser.ParseAuthInfo(directives_str), Exception);
+  EXPECT_THROW(Parser{}.ParseAuthInfo(directives_str), Exception);
 }
 
 TEST(DirectivesParser, InvalidUserhashValue) {
@@ -193,8 +185,7 @@ uri="/dir/index.html",
 response="6629fae49393a05397450978507c4ef1",
 userhash=not-a-bool
 )";
-  Parser parser;
-  EXPECT_THROW(parser.ParseAuthInfo(directives_str), ParseException);
+  EXPECT_THROW(Parser{}.ParseAuthInfo(directives_str), ParseException);
 }
 
 TEST(DirectivesParser, DuplicateDirectives) {
@@ -207,8 +198,7 @@ uri="/dir/index.html",
 algorithm=MD5,
 response="6629fae49393a05397450978507c4ef1"
 )";
-  Parser parser;
-  EXPECT_THROW(parser.ParseAuthInfo(directives_str),
+  EXPECT_THROW(Parser{}.ParseAuthInfo(directives_str),
                DuplicateDirectiveException);
 }
 

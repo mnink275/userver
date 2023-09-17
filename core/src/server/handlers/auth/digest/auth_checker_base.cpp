@@ -102,11 +102,8 @@ AuthCheckerBase::~AuthCheckerBase() = default;
 
 AuthCheckResult AuthCheckerBase::CheckAuth(const http::HttpRequest& request,
                                            request::RequestContext&) const {
-  // RFC 2617, 3: https://datatracker.ietf.org/doc/html/rfc2617
+  // RFC 7616: https://datatracker.ietf.org/doc/html/rfc7616
   // Digest Access Authentication.
-
-  // TODO: Implement a more recent version:
-  // RFC 7616 https://datatracker.ietf.org/doc/html/rfc7616
   auto& response = request.GetHttpResponse();
   const auto& etag = request.GetHeader(USERVER_NAMESPACE::http::headers::kETag);
 

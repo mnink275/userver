@@ -49,6 +49,9 @@ const utils::TrivialBiMap kClientDirectivesMap = [](auto selector) {
       .Case(directives::kUserhash, kClientDirectiveTypes::kUserhash);
 };
 
+/// Number of mandatory directives in Authorization header.
+constexpr std::size_t kClientMandatoryDirectivesNumber = 5;
+
 const std::array<kClientDirectiveTypes, kClientMandatoryDirectivesNumber>
     kMandatoryDirectives = {
         kClientDirectiveTypes::kRealm, kClientDirectiveTypes::kNonce,

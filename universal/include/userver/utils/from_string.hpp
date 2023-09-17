@@ -155,8 +155,8 @@ template <typename T>
 std::enable_if_t<meta::kIsBool<T>, T> FromString(std::string_view str) {
   static_assert(!std::is_const_v<T> && !std::is_volatile_v<T>);
   static_assert(!std::is_reference_v<T>);
-
-  static constexpr std::size_t kStrMaxLength = 5;
+  
+  static constexpr std::size_t kMaxPossibleLength = 5;
   static constexpr std::string_view kTrueLowerCase = "true";
   static constexpr std::string_view kFalseLowerCase = "false";
 
@@ -168,14 +168,13 @@ std::enable_if_t<meta::kIsBool<T>, T> FromString(std::string_view str) {
                                    typeid(T));
   }
 
-  if (str.size() > kStrMaxLength) {
+  if (str.size() > kMaxPossibleLength) {
     impl::ThrowFromStringException("no bool found", str, typeid(T));
   }
 
   if (str.size() == 1 && (str[0] == '1' || str[0] == '0')) {
     return str[0] == '1';
   }
-
 
   auto lowercase_str = str;
   std::for_each(lowercase_str.begin(), lowercase_str.end(), [](const char ch){ return std::tolower(ch); });
