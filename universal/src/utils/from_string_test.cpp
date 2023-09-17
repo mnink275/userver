@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include <userver/utils/from_string.hpp>
 
 #include <limits>
@@ -246,6 +247,18 @@ TEST(FromString, StringViewToFloatingPointBig) {
   str = std::string_view{buffer, 32};
   expected = 9;
   CheckConverts(str, expected);
+}
+
+TEST(FromString, StringViewToBool) {
+  CheckConverts("true", true);
+  CheckConverts("1", true);
+  
+  CheckConverts("false", false);
+  CheckConverts("0", false);
+
+  TestInvalid<bool>("awrawr");
+  TestInvalid<bool>(" true");
+  TestInvalid<bool>("true ");
 }
 
 USERVER_NAMESPACE_END
