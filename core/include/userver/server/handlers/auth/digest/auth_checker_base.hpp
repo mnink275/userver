@@ -92,6 +92,11 @@ class AuthCheckerBase : public auth::AuthCheckerBase {
   /// The implementation should return std::nullopt if the user is not
   /// registered. If the user is registered, but he is not in storage, the
   /// implementation can create him with arbitrary data.
+  ///
+  /// Note that if the "userhash" field is "true", "username" is hashed by the
+  /// client according to the rule:
+  /// username = H( unq(username) ":" unq(realm) )
+  /// See: https://datatracker.ietf.org/doc/html/rfc7616#section-3.4.4
   virtual std::optional<UserData> FetchUserData(
       const std::string& username) const = 0;
 

@@ -135,20 +135,14 @@ AuthCheckResult AuthCheckerBase::CheckAuth(const http::HttpRequest& request,
     throw handlers::ClientError();
   }
 
-  std::string username;
-  if (userhash_ && client_context.userhash) {
-    // username = H( unq(username) ":" unq(realm) )
-    // See: https://datatracker.ietf.org/doc/html/rfc7616#section-3.4.4
-    username = digest_hasher_.GetHash(
-        fmt::format("{}:{}", username, client_context.realm));
-  } else {
-    username = client_context.username;
-  }
   // Check if user have been registred.
-  auto user_data_opt = FetchUserData(username);
+  auto user_data_opt = FetchUserData(client_context.username);
   if (!user_data_opt.has_value()) {
     LOG_WARNING() << fmt::format("User with username {} is not registered.",
                                  client_context.username);
+    if (userhash_) {
+      LOG_WARNING() << "Note: username above was hashed by the client";
+    }
     return AuthCheckResult{AuthCheckResult::Status::kForbidden};
   }
 
