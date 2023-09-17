@@ -7,6 +7,7 @@
 #include <userver/dynamic_config/value.hpp>
 #include <userver/server/handlers/auth/digest/types.hpp>
 #include <userver/utils/async.hpp>
+#include <userver/utils/text.hpp>
 #include <userver/yaml_config/merge_schemas.hpp>
 
 USERVER_NAMESPACE_BEGIN
@@ -23,10 +24,8 @@ AuthCheckerSettingsComponent::AuthCheckerSettingsComponent(
   auto parsed_algorithm = config["algorithm"].As<std::string>("SHA-256");
 
   std::string_view algorithm = parsed_algorithm;
-  const auto dash_index = algorithm.size() - kSessSuffix.size();
-  if (algorithm.size() > kSessSuffix.size() &&
-      algorithm.substr(dash_index) == kSessSuffix) {
-    algorithm = algorithm.substr(0, dash_index);
+  if (utils::text::EndsWith(algorithm, kSessSuffix)) {
+    algorithm = algorithm.substr(0, algorithm.size() - kSessSuffix.size());
     settings_.is_session = true;
   }
   if (!kHashAlgorithmsMap.TryFind(algorithm).has_value()) {
