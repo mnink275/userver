@@ -48,16 +48,16 @@ AuthCheckerSettingsComponent::AuthCheckerSettingsComponent(
   settings_.qop = fmt::format("{}", fmt::join(std::move(qops), ","));
 
   settings_.is_proxy = config["is-proxy"].As<bool>(false);
+
   settings_.nonce_ttl =
       config["nonce-ttl"].As<std::chrono::milliseconds>(kDefaultTtlMs);
 
-  auto charset_opt = config["charset"].As<std::optional<std::string>>();
-  if (charset_opt.has_value() &&
-      !kSupportedCharsets.Contains(charset_opt.value())) {
+  auto charset = config["charset"].As<std::string>("UTF-8");
+  if (!kSupportedCharsets.Contains(charset)) {
     throw std::runtime_error(
-        fmt::format("charset '{}' is not allowed", charset_opt.value()));
+        fmt::format("charset '{}' is not allowed", charset));
   }
-  settings_.charset = std::move(charset_opt);
+  settings_.charset = std::move(charset);
 
   settings_.userhash = config["userhash"].As<bool>(false);
 }
@@ -100,11 +100,11 @@ properties:
         defaultDescription: 10s
     charset:
         type: string
-        description: optional, indicates the encoding scheme server supports
+        description: indicates the encoding scheme server supports
         defaultDescription: The only allowed value is "UTF-8"
     userhash:
         type: boolean
-        description: optional, indicates that the username has been hashed by client
+        description: indicates that the username has been hashed by client
         defaultDescription: false
 )");
 }

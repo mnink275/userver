@@ -27,7 +27,7 @@ struct AuthCheckerSettings {
   /// TTL for nonces.
   std::chrono::milliseconds nonce_ttl{0};
   /// Used to indicate the encoding scheme server supports.
-  std::optional<std::string> charset;
+  std::string charset;
   /// A string indicating an algorithm used to produce the digest.
   std::string algorithm;
   /// Used to indicate that the authentication server is a proxy. Affects the

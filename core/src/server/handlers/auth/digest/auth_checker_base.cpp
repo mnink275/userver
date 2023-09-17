@@ -270,13 +270,9 @@ std::string AuthCheckerBase::ConstructResponseDirectives(std::string_view nonce,
       fmt::format("{}=\"{}\", ", directives::kNonce, nonce),
       fmt::format("{}={}, ", directives::kStale, stale),
       fmt::format("{}={}, ", directives::kAlgorithm, algorithm),
-      fmt::format("{}=\"{}\"", directives::kQop, qop_));
-
-  if (charset_.has_value()) {
-    header_value.append(
-        fmt::format(", {}={}", directives::kCharset, charset_.value()));
-  }
-  header_value.append(fmt::format(", {}={}", directives::kUserhash, userhash_));
+      fmt::format("{}=\"{}\"", directives::kQop, qop_),
+      fmt::format("{}={}, ", directives::kCharset, charset_),
+      fmt::format("{}={}, ", directives::kUserhash, userhash_));
 
   return header_value;
 }
