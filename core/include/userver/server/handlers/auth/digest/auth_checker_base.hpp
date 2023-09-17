@@ -133,6 +133,7 @@ class AuthCheckerBase : public auth::AuthCheckerBase {
   const std::string& algorithm_;
   const bool is_session_;
   const bool is_proxy_;
+  const bool userhash_;
   const std::chrono::milliseconds nonce_ttl_;
 
   const Hasher digest_hasher_;

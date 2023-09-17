@@ -21,7 +21,7 @@ namespace server::handlers::auth::digest {
 struct AuthCheckerSettings {
   /// A string indicating an algorithm used to produce the digest.
   std::string algorithm;
-  /// Space-separated list of URIs that define the protection space
+  /// Space-separated list of URIs that define the protection space.
   std::vector<std::string> domain;
   /// Array of one or more tokens indicating the "quality of protection" values
   /// supported by the server.
@@ -36,6 +36,8 @@ struct AuthCheckerSettings {
   std::chrono::milliseconds nonce_ttl{0};
   /// Used to indicate the encoding scheme server supports.
   std::optional<std::string> charset;
+  /// Used to indicate that server supports username hashing.
+  bool userhash{false};
 };
 
 }  // namespace server::handlers::auth::digest

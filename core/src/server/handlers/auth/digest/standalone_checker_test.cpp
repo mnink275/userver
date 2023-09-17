@@ -50,7 +50,8 @@ class StandAloneCheckerTest : public ::testing::Test {
             false,                             // is_proxy
             false,                             // is_session
             kNonceTTL,                         // nonce_ttl
-            "UTF-8"                            // charset
+            "UTF-8",                           // charset
+            false                              // userhash
         }),
         checker_(digest_settings_, "testrealm@host.com"),
         correct_client_context_({
@@ -64,6 +65,7 @@ class StandAloneCheckerTest : public ::testing::Test {
             "5ccc069c403ebaf9f0171e9517f40e41",  // opaque
             "auth",                              // qop
             "00000001",                          // nc
+            true,                                // userhash
             "auth-param"                         // authparam
         }) {
     client_context_ = correct_client_context_;

@@ -24,7 +24,7 @@ struct ContextFromServer {
 
 /// Authorization header from client request
 /// username, realm, nonce, digest-uri directives response are mandatory
-/// algorithm, cnonce, opaque, qop, nc, auth-param directives are optional
+/// algorithm, cnonce, opaque, qop, nc, userhash, auth-param directives are optional
 struct ContextFromClient {
   std::string username;
   std::string realm;
@@ -36,12 +36,9 @@ struct ContextFromClient {
   std::string opaque;
   std::string qop;
   std::string nc;
+  bool userhash{false};
   std::string authparam;
 };
-
-/// Max number of directives in Authorization header.
-/// Must be equal to the number of DigestContextFromClient fields.
-inline constexpr std::size_t kMaxClientDirectivesNumber = 11;
 
 /// Number of mandatory directives in Authorization header.
 inline constexpr std::size_t kClientMandatoryDirectivesNumber = 5;

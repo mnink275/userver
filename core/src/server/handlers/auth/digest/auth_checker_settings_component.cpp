@@ -58,6 +58,8 @@ AuthCheckerSettingsComponent::AuthCheckerSettingsComponent(
         fmt::format("charset '{}' is not allowed", charset_opt.value()));
   }
   settings_.charset = std::move(charset_opt);
+
+  settings_.userhash = config["userhash"].As<bool>(false);
 }
 
 AuthCheckerSettingsComponent::~AuthCheckerSettingsComponent() = default;
@@ -100,6 +102,10 @@ properties:
         type: string
         description: optional, indicates the encoding scheme server supports
         defaultDescription: The only allowed value is "UTF-8"
+    userhash:
+        type: boolean
+        description: optional, indicates the encoding scheme server supports
+        defaultDescription: false
 )");
 }
 

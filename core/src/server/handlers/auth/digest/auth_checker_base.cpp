@@ -82,6 +82,7 @@ AuthCheckerBase::AuthCheckerBase(const AuthCheckerSettings& digest_settings,
       algorithm_(digest_settings.algorithm),
       is_session_(digest_settings.is_session),
       is_proxy_(digest_settings.is_proxy),
+      userhash_(digest_settings.userhash),
       nonce_ttl_(digest_settings.nonce_ttl),
       digest_hasher_(algorithm_),
       authenticate_header_(
@@ -137,8 +138,16 @@ AuthCheckResult AuthCheckerBase::CheckAuth(const http::HttpRequest& request,
     throw handlers::ClientError();
   }
 
+  std::string username;
+  if (userhash_ && client_context.userhash) {
+    // username = H( unq(username) ":" unq(realm) )
+    // See: https://datatracker.ietf.org/doc/html/rfc7616#section-3.4.4
+    username = digest_hasher_.GetHash(fmt::format("{}:{}", username, client_context.realm));
+  } else {
+    username = client_context.username;
+  }
   // Check if user have been registred.
-  auto user_data_opt = FetchUserData(client_context.username);
+  auto user_data_opt = FetchUserData(username);
   if (!user_data_opt.has_value()) {
     LOG_WARNING() << fmt::format("User with username {} is not registered.",
                                  client_context.username);
@@ -269,6 +278,8 @@ std::string AuthCheckerBase::ConstructResponseDirectives(std::string_view nonce,
     header_value.append(
         fmt::format(", {}={}", directives::kCharset, charset_.value()));
   }
+  header_value.append(
+        fmt::format(", {}={}", directives::kUserhash, userhash_));
 
   return header_value;
 }
