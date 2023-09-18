@@ -31,11 +31,19 @@ def parse_directives(authentication_header: str):
     return dict(REG.findall(authentication_header))
 
 
-# checks if mandatory directives are in WWW-Authenticate header
-def auth_directives_assert(auth_directives: dict):
+# checks if the fields are present in WWW-Authenticate header
+def auth_fields_assert(auth_directives: dict):
     assert 'realm' in auth_directives
     assert 'nonce' in auth_directives
     assert 'algorithm' in auth_directives
     assert 'qop' in auth_directives
     assert 'charset' in auth_directives
     assert 'userhash' in auth_directives
+
+
+# checks if the fields are present in Authentication-Info header
+def auth_info_fields_assert(auth_directives: dict):
+    assert 'nextnonce' in auth_directives
+    assert 'qop' in auth_directives
+    assert 'cnonce' in auth_directives
+    assert 'nc' in auth_directives

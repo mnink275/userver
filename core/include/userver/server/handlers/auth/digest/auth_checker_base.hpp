@@ -118,19 +118,23 @@ class AuthCheckerBase : public auth::AuthCheckerBase {
                                   const UserData& user_data) const;
   /// @endcond
  private:
-  std::string CalculateDigest(const UserData::HA1& ha1_non_loggable,
-                              http::HttpMethod request_method,
+  std::string CalculateDigest(std::string_view ha1, std::string_view ha2,
                               const ContextFromClient& client_context) const;
 
-  std::string ConstructAuthInfoHeader(const ContextFromClient& client_context,
+  std::string ConstructAuthInfoHeaderValue(std::string_view ha1, std::string_view ha2, const ContextFromClient& client_context,
                                       std::string_view etag) const;
 
-  std::string ConstructResponseDirectives(std::string_view nonce,
+  std::string ConstructResponseHeaderValue(std::string_view nonce,
                                           bool stale) const;
 
   AuthCheckResult StartNewAuthSession(std::string username, std::string&& nonce,
                                       bool stale,
                                       http::HttpResponse& response) const;
+
+  std::string GetHA1(const UserData::HA1& ha1_non_loggable,
+                     const ContextFromClient& client_context) const;
+
+  std::string GetHA2(std::string_view http_method, std::string_view uri) const;
 
   const std::string realm_;
 

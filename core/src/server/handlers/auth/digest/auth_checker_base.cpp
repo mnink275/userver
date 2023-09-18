@@ -115,7 +115,7 @@ AuthCheckResult AuthCheckerBase::CheckAuth(const http::HttpRequest& request,
 
     response.SetStatus(unauthorized_status_);
     response.SetHeader(authenticate_header_,
-                       ConstructResponseDirectives(nonce, true));
+                       ConstructResponseHeaderValue(nonce, true));
 
     PushUnnamedNonce(std::move(nonce));
 
@@ -163,13 +163,15 @@ AuthCheckResult AuthCheckerBase::CheckAuth(const http::HttpRequest& request,
   }
 
   // Server MUST perform the same digest operation (e.g. SHA-256) performed
-  // by the client and compare the result to the given `response` value.
+  // by the client and compare the result to the given 'response' value.
+  auto ha1 = GetHA1(user_data.ha1, client_context);
+  auto ha2 = GetHA2(ToString(request.GetMethod()), client_context.uri);
   auto digest =
-      CalculateDigest(user_data.ha1, request.GetMethod(), client_context);
+      CalculateDigest(ha1, ha2, client_context);
   if (!crypto::algorithm::AreStringsEqualConstTime(digest,
                                                    client_context.response)) {
     response.SetStatus(unauthorized_status_);
-    response.SetHeader(authenticate_header_, ConstructResponseDirectives(
+    response.SetHeader(authenticate_header_, ConstructResponseHeaderValue(
                                                  client_context.nonce, false));
     return AuthCheckResult{AuthCheckResult::Status::kInvalidToken};
   }
@@ -177,7 +179,11 @@ AuthCheckResult AuthCheckerBase::CheckAuth(const http::HttpRequest& request,
   // Authentication-Info contains the "nextnonce" required for subsequent
   // authentication.
   // https://datatracker.ietf.org/doc/html/rfc7616#section-3.5
-  auto info_header_directives = ConstructAuthInfoHeader(client_context, etag);
+  //
+  // 'rspauth' value is calculated in the same way as 'response' except
+  // A2 = ":" request-uri
+  ha2 = GetHA2("", client_context.uri);
+  auto info_header_directives = ConstructAuthInfoHeaderValue(ha1, ha2, client_context, etag);
   response.SetHeader(authenticate_info_header_, info_header_directives);
 
   return {};
@@ -230,13 +236,21 @@ AuthCheckerBase::ValidateResult AuthCheckerBase::ValidateUserData(
   return ValidateResult::kOk;
 }
 
-std::string AuthCheckerBase::ConstructAuthInfoHeader(
-    const ContextFromClient& client_context, std::string_view etag) const {
-  auto next_nonce = digest_hasher_.GenerateNonce(etag);
-  SetUserData(client_context.username, next_nonce, 0, utils::datetime::Now());
+std::string AuthCheckerBase::ConstructAuthInfoHeaderValue(
+    std::string_view ha1, std::string_view ha2,
+    const ContextFromClient& client_context,
+    std::string_view etag) const {
+  auto nextnonce = digest_hasher_.GenerateNonce(etag);
+  SetUserData(client_context.username, nextnonce, 0, utils::datetime::Now());
 
-  return fmt::format("{}=\"{}\"", directives::kNextNonce,
-                     std::move(next_nonce));
+  auto rspath = CalculateDigest(ha1, ha2, client_context);
+
+  return utils::StrCat(
+      fmt::format("{}=\"{}\", ", directives::kNextNonce, std::move(nextnonce)),
+      fmt::format("{}={}, ", directives::kQop, client_context.qop),
+      fmt::format("{}=\"{}\", ", directives::kResponseAuth, std::move(rspath)),
+      fmt::format("{}=\"{}\", ", directives::kCnonce, client_context.cnonce),
+      fmt::format("{}={}", directives::kNonceCount, client_context.nc));
 }
 
 AuthCheckResult AuthCheckerBase::StartNewAuthSession(
@@ -244,54 +258,66 @@ AuthCheckResult AuthCheckerBase::StartNewAuthSession(
     http::HttpResponse& response) const {
   response.SetStatus(unauthorized_status_);
   response.SetHeader(authenticate_header_,
-                     ConstructResponseDirectives(nonce, stale));
+                     ConstructResponseHeaderValue(nonce, stale));
 
   SetUserData(std::move(username), std::move(nonce), 0, utils::datetime::Now());
 
   return AuthCheckResult{AuthCheckResult::Status::kInvalidToken};
 }
 
-std::string AuthCheckerBase::ConstructResponseDirectives(std::string_view nonce,
+std::string AuthCheckerBase::ConstructResponseHeaderValue(std::string_view nonce,
                                                          bool stale) const {
   // The WWW-Authenticate Response Header Field.
   // https://datatracker.ietf.org/doc/html/rfc7616#section-3.3
   auto algorithm = algorithm_;
   if (is_session_) algorithm.append(kSessSuffix);
 
-  auto header_value = utils::StrCat(
+  return utils::StrCat(
       "Digest ", fmt::format("{}=\"{}\", ", directives::kRealm, realm_),
       fmt::format("{}=\"{}\", ", directives::kDomain, domain_),
       fmt::format("{}=\"{}\", ", directives::kNonce, nonce),
       fmt::format("{}={}, ", directives::kStale, stale),
       fmt::format("{}={}, ", directives::kAlgorithm, algorithm),
-      fmt::format("{}=\"{}\"", directives::kQop, qop_),
+      fmt::format("{}=\"{}\", ", directives::kQop, qop_),
       fmt::format("{}={}, ", directives::kCharset, charset_),
       fmt::format("{}={}, ", directives::kUserhash, userhash_));
-
-  return header_value;
 }
 
 std::string AuthCheckerBase::CalculateDigest(
-    const UserData::HA1& ha1_non_loggable, http::HttpMethod request_method,
+    std::string_view ha1, std::string_view ha2,
     const ContextFromClient& client_context) const {
   // 'digest' value is calculated in the same way as 'response'
   // https://datatracker.ietf.org/doc/html/rfc7616#section-3.4.1
+  auto digest = fmt::format("{}:{}:{}:{}:{}:{}", ha1, client_context.nonce,
+                            client_context.nc, client_context.cnonce,
+                            client_context.qop, ha2);
+  return digest_hasher_.GetHash(digest);
+}
+
+std::string AuthCheckerBase::GetHA1(
+    const UserData::HA1& ha1_non_loggable,
+    const ContextFromClient& client_context) const {
   auto ha1 = ha1_non_loggable.GetUnderlying();
   if (is_session_) {
     // If algorithm Session variant enabled, then A1 is calculated using the
     // 'nonce' and 'cnonce' values.
     // https://datatracker.ietf.org/doc/html/rfc7616#section-3.4.2
     ha1.append(
-        fmt::format("{}:{}", client_context.nonce, client_context.cnonce));
+        fmt::format(":{}:{}", client_context.nonce, client_context.cnonce));
   }
 
-  auto a2 = fmt::format("{}:{}", ToString(request_method), client_context.uri);
-  auto ha2 = digest_hasher_.GetHash(a2);
+  return ha1;
+}
 
-  auto digest = fmt::format("{}:{}:{}:{}:{}:{}", ha1, client_context.nonce,
-                            client_context.nc, client_context.cnonce,
-                            client_context.qop, ha2);
-  return digest_hasher_.GetHash(digest);
+std::string AuthCheckerBase::GetHA2(std::string_view http_method,
+                                    std::string_view uri) const {
+  // If the qop value is "auth":
+  // A2 = Method ":" request-uri
+  //
+  // If the qop value is "auth-int" (сurrently not supported):
+  // A2 = Method ":" request-uri ":" H(entity-body)
+  // https://datatracker.ietf.org/doc/html/rfc7616#section-3.4.3
+  return digest_hasher_.GetHash(fmt::format("{}:{}",  http_method, uri));
 }
 
 }  // namespace server::handlers::auth::digest

@@ -17,6 +17,7 @@ inline const std::string kStale = "stale";
 inline const std::string kUri = "uri";
 inline const std::string kDomain = "domain";
 inline const std::string kResponse = "response";
+inline const std::string kResponseAuth = "rspauth";
 inline const std::string kAlgorithm = "algorithm";
 inline const std::string kCnonce = "cnonce";
 inline const std::string kOpaque = "opaque";

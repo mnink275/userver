@@ -11,7 +11,7 @@ async def test_authenticate_base(service_client):
     authentication_header = response.headers['WWW-Authenticate']
     auth_directives = auth_utils.parse_directives(authentication_header)
 
-    auth_utils.auth_directives_assert(auth_directives)
+    auth_utils.auth_fields_assert(auth_directives)
 
     challenge = auth_utils.construct_challenge(auth_directives)
     auth_header = auth_utils.construct_header('username', 'pswd', challenge, '/v1/hello')
@@ -21,6 +21,10 @@ async def test_authenticate_base(service_client):
     )
     assert response.status == 200
     assert 'Authentication-Info' in response.headers
+
+    authentication_header = response.headers['Authentication-Info']
+    auth_directives = auth_utils.parse_directives(authentication_header)
+    auth_utils.auth_info_fields_assert(auth_directives)
 
 
 # /// [Functional test]
@@ -34,7 +38,7 @@ async def test_authenticate_base_unregisted_user(service_client):
     authentication_header = response.headers['WWW-Authenticate']
     auth_directives = auth_utils.parse_directives(authentication_header)
 
-    auth_utils.auth_directives_assert(auth_directives)
+    auth_utils.auth_fields_assert(auth_directives)
 
     challenge = auth_utils.construct_challenge(auth_directives)
     auth_header = auth_utils.construct_header(
@@ -55,7 +59,7 @@ async def test_postgres_wrong_data(service_client):
     authentication_header = response.headers['WWW-Authenticate']
     auth_directives = auth_utils.parse_directives(authentication_header)
 
-    auth_utils.auth_directives_assert(auth_directives)
+    auth_utils.auth_fields_assert(auth_directives)
 
     challenge = auth_utils.construct_challenge(auth_directives)
     auth_header = auth_utils.construct_header(
@@ -77,7 +81,7 @@ async def test_repeated_auth(service_client):
     authentication_header = response.headers['WWW-Authenticate']
     auth_directives = auth_utils.parse_directives(authentication_header)
 
-    auth_utils.auth_directives_assert(auth_directives)
+    auth_utils.auth_fields_assert(auth_directives)
 
     challenge = auth_utils.construct_challenge(auth_directives)
     auth_header = auth_utils.construct_header('username', 'pswd', challenge, '/v1/hello')
@@ -101,6 +105,10 @@ async def test_repeated_auth(service_client):
     assert response.status == 200
     assert 'Authentication-Info' in response.headers
 
+    authentication_header = response.headers['Authentication-Info']
+    auth_directives = auth_utils.parse_directives(authentication_header)
+    auth_utils.auth_info_fields_assert(auth_directives)
+
 
 @pytest.mark.pgsql('auth', files=['test_data.sql'])
 async def test_same_nonce_repeated_use(service_client):
@@ -110,7 +118,7 @@ async def test_same_nonce_repeated_use(service_client):
     authentication_header = response.headers['WWW-Authenticate']
     auth_directives = auth_utils.parse_directives(authentication_header)
 
-    auth_utils.auth_directives_assert(auth_directives)
+    auth_utils.auth_fields_assert(auth_directives)
 
     challenge = auth_utils.construct_challenge(auth_directives)
     auth_header = auth_utils.construct_header('username', 'pswd', challenge, '/v1/hello')
@@ -148,7 +156,7 @@ async def test_expiring_nonce(service_client, mocked_time):
     authentication_header = response.headers['WWW-Authenticate']
     auth_directives = auth_utils.parse_directives(authentication_header)
 
-    auth_utils.auth_directives_assert(auth_directives)
+    auth_utils.auth_fields_assert(auth_directives)
 
     challenge = auth_utils.construct_challenge(auth_directives)
     auth_header = auth_utils.construct_header('username', 'pswd', challenge, '/v1/hello')
@@ -177,7 +185,7 @@ async def test_expiring_nonce(service_client, mocked_time):
     authentication_header = response.headers['WWW-Authenticate']
     auth_directives = auth_utils.parse_directives(authentication_header)
 
-    auth_utils.auth_directives_assert(auth_directives)
+    auth_utils.auth_fields_assert(auth_directives)
 
     challenge = auth_utils.construct_challenge(auth_directives)
     auth_header = auth_utils.construct_header('username', 'pswd', challenge, '/v1/hello')
@@ -188,6 +196,10 @@ async def test_expiring_nonce(service_client, mocked_time):
     assert response.status == 200
     assert 'Authentication-Info' in response.headers
 
+    authentication_header = response.headers['Authentication-Info']
+    auth_directives = auth_utils.parse_directives(authentication_header)
+    auth_utils.auth_info_fields_assert(auth_directives)
+
 
 @pytest.mark.pgsql('auth', files=['test_data.sql'])
 async def test_aliving_nonce_after_half_ttl(service_client, mocked_time):
@@ -197,7 +209,7 @@ async def test_aliving_nonce_after_half_ttl(service_client, mocked_time):
     authentication_header = response.headers['WWW-Authenticate']
     auth_directives = auth_utils.parse_directives(authentication_header)
 
-    auth_utils.auth_directives_assert(auth_directives)
+    auth_utils.auth_fields_assert(auth_directives)
 
     challenge = auth_utils.construct_challenge(auth_directives)
     auth_header = auth_utils.construct_header('username', 'pswd', challenge, '/v1/hello')
@@ -224,6 +236,10 @@ async def test_aliving_nonce_after_half_ttl(service_client, mocked_time):
     assert response.status == 200
     assert 'Authentication-Info' in response.headers
 
+    authentication_header = response.headers['Authentication-Info']
+    auth_directives = auth_utils.parse_directives(authentication_header)
+    auth_utils.auth_info_fields_assert(auth_directives)
+
 
 @pytest.mark.pgsql('auth', files=['test_data.sql'])
 async def test_repeated_auth_ignore_nextnonce(service_client):
@@ -233,7 +249,7 @@ async def test_repeated_auth_ignore_nextnonce(service_client):
     authentication_header = response.headers['WWW-Authenticate']
     auth_directives = auth_utils.parse_directives(authentication_header)
 
-    auth_utils.auth_directives_assert(auth_directives)
+    auth_utils.auth_fields_assert(auth_directives)
 
     challenge = auth_utils.construct_challenge(auth_directives)
     auth_header = auth_utils.construct_header('username', 'pswd', challenge, '/v1/hello')
@@ -256,3 +272,7 @@ async def test_repeated_auth_ignore_nextnonce(service_client):
         '/v1/hello', headers={'Authorization': auth_header},
     )
     assert response.status == 200
+
+    authentication_header = response.headers['Authentication-Info']
+    auth_directives = auth_utils.parse_directives(authentication_header)
+    auth_utils.auth_info_fields_assert(auth_directives)

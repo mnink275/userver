@@ -11,7 +11,7 @@ async def test_authenticate_base_proxy(service_client):
     authentication_header = response.headers['Proxy-Authenticate']
     auth_directives = auth_utils.parse_directives(authentication_header)
 
-    auth_utils.auth_directives_assert(auth_directives)
+    auth_utils.auth_fields_assert(auth_directives)
 
     challenge = auth_utils.construct_challenge(auth_directives)
     auth_header = auth_utils.construct_header('username', 'pswd', challenge, '/v1/hello-proxy')
@@ -22,6 +22,10 @@ async def test_authenticate_base_proxy(service_client):
     assert response.status == 200
     assert 'Proxy-Authentication-Info' in response.headers
 
+    authentication_header = response.headers['Proxy-Authentication-Info']
+    auth_directives = auth_utils.parse_directives(authentication_header)
+    auth_utils.auth_info_fields_assert(auth_directives)
+
 
 @pytest.mark.pgsql('auth', files=['test_data.sql'])
 async def test_postgres_wrong_data_proxy(service_client):
@@ -31,7 +35,7 @@ async def test_postgres_wrong_data_proxy(service_client):
     authentication_header = response.headers['Proxy-Authenticate']
     auth_directives = auth_utils.parse_directives(authentication_header)
 
-    auth_utils.auth_directives_assert(auth_directives)
+    auth_utils.auth_fields_assert(auth_directives)
 
     challenge = auth_utils.construct_challenge(auth_directives)
     auth_header = auth_utils.construct_header(
