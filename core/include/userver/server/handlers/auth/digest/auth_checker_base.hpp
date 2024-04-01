@@ -12,6 +12,7 @@
 #include <string_view>
 
 #include <userver/crypto/hash.hpp>
+#include <userver/http/predefined_header.hpp>
 #include <userver/rcu/rcu_map.hpp>
 #include <userver/server/handlers/auth/digest/auth_checker_settings.hpp>
 #include <userver/server/handlers/auth/digest/directives_parser.hpp>
@@ -91,6 +92,11 @@ class AuthCheckerBase : public auth::AuthCheckerBase {
   /// The implementation should return std::nullopt if the user is not
   /// registered. If the user is registered, but he is not in storage, the
   /// implementation can create him with arbitrary data.
+  ///
+  /// Note that if the "userhash" field is "true", "username" is hashed by the
+  /// client according to the rule:
+  /// username = H( unq(username) ":" unq(realm) )
+  /// See: https://datatracker.ietf.org/doc/html/rfc7616#section-3.4.4
   virtual std::optional<UserData> FetchUserData(
       const std::string& username) const = 0;
 
@@ -112,34 +118,43 @@ class AuthCheckerBase : public auth::AuthCheckerBase {
                                   const UserData& user_data) const;
   /// @endcond
  private:
-  std::string CalculateDigest(const UserData::HA1& ha1_non_loggable,
-                              http::HttpMethod request_method,
+  std::string CalculateDigest(std::string_view ha1, std::string_view ha2,
                               const ContextFromClient& client_context) const;
 
-  std::string ConstructAuthInfoHeader(const ContextFromClient& client_context,
+  std::string ConstructAuthInfoHeaderValue(std::string_view ha1, std::string_view ha2, const ContextFromClient& client_context,
                                       std::string_view etag) const;
 
-  std::string ConstructResponseDirectives(std::string_view nonce,
+  std::string ConstructResponseHeaderValue(std::string_view nonce,
                                           bool stale) const;
 
   AuthCheckResult StartNewAuthSession(std::string username, std::string&& nonce,
                                       bool stale,
                                       http::HttpResponse& response) const;
 
-  const std::string qops_;
+  std::string GetHA1(const UserData::HA1& ha1_non_loggable,
+                     const ContextFromClient& client_context) const;
+
+  std::string GetHA2(std::string_view http_method, std::string_view uri) const;
+
   const std::string realm_;
-  const std::string domains_;
-  std::string_view algorithm_;
+
+  const std::string& domain_;
+  const std::string& qop_;
+  const std::chrono::milliseconds nonce_ttl_;
+  const std::string& charset_;
+  const std::string& algorithm_;
   const bool is_session_;
   const bool is_proxy_;
-  const std::chrono::milliseconds nonce_ttl_;
+  const bool userhash_;
+
+  const http::HttpStatus unauthorized_status_;
+
+  using PredefinedHeader = USERVER_NAMESPACE::http::headers::PredefinedHeader;
+  const PredefinedHeader& authenticate_header_;
+  const PredefinedHeader& authorization_header_;
+  const PredefinedHeader& authenticate_info_header_;
 
   const Hasher digest_hasher_;
-
-  const std::string authenticate_header_;
-  const std::string authorization_header_;
-  const std::string authenticate_info_header_;
-  const http::HttpStatus unauthorized_status_;
 };
 
 }  // namespace server::handlers::auth::digest

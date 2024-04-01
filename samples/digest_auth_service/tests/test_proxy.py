@@ -8,13 +8,11 @@ async def test_authenticate_base_proxy(service_client):
     response = await service_client.get('/v1/hello-proxy')
     assert response.status == 401
 
-    authentication_header = response.headers['Proxy-Authenticate']
-    auth_directives = auth_utils.parse_directives(authentication_header)
+    fields = auth_utils.parse_fields(response.headers['Proxy-Authenticate'])
+    auth_utils.auth_header_fields_asserts(fields)
 
-    auth_utils.auth_directives_assert(auth_directives)
-
-    challenge = auth_utils.construct_challenge(auth_directives)
-    auth_header = auth_utils.construct_header('username', 'pswd', challenge)
+    challenge = auth_utils.construct_challenge(fields)
+    auth_header = auth_utils.construct_header('username', 'pswd', challenge, '/v1/hello-proxy')
 
     response = await service_client.get(
         '/v1/hello-proxy', headers={'Proxy-Authorization': auth_header},
@@ -22,20 +20,21 @@ async def test_authenticate_base_proxy(service_client):
     assert response.status == 200
     assert 'Proxy-Authentication-Info' in response.headers
 
+    fields = auth_utils.parse_fields(response.headers['Proxy-Authentication-Info'])
+    auth_utils.auth_info_header_fields_asserts(fields)
+
 
 @pytest.mark.pgsql('auth', files=['test_data.sql'])
 async def test_postgres_wrong_data_proxy(service_client):
     response = await service_client.get('/v1/hello-proxy')
     assert response.status == 401
 
-    authentication_header = response.headers['Proxy-Authenticate']
-    auth_directives = auth_utils.parse_directives(authentication_header)
+    fields = auth_utils.parse_fields(response.headers['Proxy-Authenticate'])
+    auth_utils.auth_header_fields_asserts(fields)
 
-    auth_utils.auth_directives_assert(auth_directives)
-
-    challenge = auth_utils.construct_challenge(auth_directives)
+    challenge = auth_utils.construct_challenge(fields)
     auth_header = auth_utils.construct_header(
-        'username', 'wrong-password', challenge,
+        'username', 'wrong-password', challenge, '/v1/hello-proxy'
     )
 
     response = await service_client.get(

@@ -4,6 +4,7 @@
 /// @brief @copybrief utils::FromString
 /// @ingroup userver_universal
 
+#include <algorithm>
 #include <cctype>
 #include <cerrno>
 #include <charconv>
@@ -150,6 +151,44 @@ std::enable_if_t<meta::kIsInteger<T>, T> FromString(std::string_view str) {
   }
 
   return result;
+}
+
+template <typename T>
+std::enable_if_t<meta::kIsBool<T>, T> FromString(std::string_view str) {
+  static_assert(!std::is_const_v<T> && !std::is_volatile_v<T>);
+  static_assert(!std::is_reference_v<T>);
+  
+  static constexpr std::size_t kMaxPossibleLength = 5;
+  static constexpr std::string_view kTrueLowerCase = "true";
+  static constexpr std::string_view kFalseLowerCase = "false";
+
+  if (str.empty()) {
+    impl::ThrowFromStringException("empty string", str, typeid(T));
+  }
+  if (std::isspace(str[0])) {
+    impl::ThrowFromStringException("leading spaces are not allowed", str,
+                                   typeid(T));
+  }
+
+  if (str.size() > kMaxPossibleLength) {
+    impl::ThrowFromStringException("no bool found", str, typeid(T));
+  }
+
+  if (str.size() == 1 && (str[0] == '1' || str[0] == '0')) {
+    return str[0] == '1';
+  }
+
+  auto lowercase_str = str;
+  std::for_each(lowercase_str.begin(), lowercase_str.end(), [](const char ch){ return std::tolower(ch); });
+  if (lowercase_str == kTrueLowerCase) {
+    return true;
+  }
+
+  if (lowercase_str == kFalseLowerCase) {
+    return false;
+  }
+
+  impl::ThrowFromStringException("no bool found", str, typeid(T));
 }
 
 }  // namespace impl

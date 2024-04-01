@@ -7,6 +7,8 @@
 #include <string>
 #include <string_view>
 
+#include <boost/pfr.hpp>
+
 #include "context.hpp"
 
 USERVER_NAMESPACE_BEGIN
@@ -26,7 +28,9 @@ class Parser final {
   void CheckMandatoryDirectivesPresent() const;
   void CheckDuplicateDirectivesExist() const;
 
-  std::array<std::size_t, kMaxClientDirectivesNumber> directives_counter_{};
+  constexpr static auto kClientDirectivesCount =
+      boost::pfr::tuple_size_v<ContextFromClient>;
+  std::array<std::size_t, kClientDirectivesCount> directives_counter_{};
 };
 
 }  // namespace server::handlers::auth::digest

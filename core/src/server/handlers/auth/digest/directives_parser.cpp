@@ -9,6 +9,7 @@
 #include <userver/server/handlers/auth/digest/directives.hpp>
 #include <userver/server/handlers/auth/digest/exception.hpp>
 #include <userver/utils/trivial_map.hpp>
+#include "userver/utils/from_string.hpp"
 
 USERVER_NAMESPACE_BEGIN
 
@@ -29,7 +30,7 @@ enum class kClientDirectiveTypes {
   kOpaque,
   kQop,
   kNonceCount,
-  kAuthParam,
+  kUserhash,
   kUnknown
 };
 
@@ -45,8 +46,11 @@ const utils::TrivialBiMap kClientDirectivesMap = [](auto selector) {
       .Case(directives::kOpaque, kClientDirectiveTypes::kOpaque)
       .Case(directives::kQop, kClientDirectiveTypes::kQop)
       .Case(directives::kNonceCount, kClientDirectiveTypes::kNonceCount)
-      .Case(directives::kAuthParam, kClientDirectiveTypes::kAuthParam);
+      .Case(directives::kUserhash, kClientDirectiveTypes::kUserhash);
 };
+
+/// Number of mandatory directives in Authorization header.
+constexpr std::size_t kClientMandatoryDirectivesNumber = 5;
 
 const std::array<kClientDirectiveTypes, kClientMandatoryDirectivesNumber>
     kMandatoryDirectives = {
@@ -208,8 +212,13 @@ void Parser::PushToClientContext(std::string&& directive, std::string&& value,
     case kClientDirectiveTypes::kNonceCount:
       client_context.nc = std::move(value);
       break;
-    case kClientDirectiveTypes::kAuthParam:
-      client_context.authparam = std::move(value);
+    case kClientDirectiveTypes::kUserhash:
+      try {
+        client_context.userhash = utils::FromString<bool>(value);
+      } catch (const std::runtime_error& ex) {
+        LOG_ERROR() << ex;
+        throw ParseException("Wrong userhash field value format");
+      }
       break;
     case kClientDirectiveTypes::kUnknown:
       throw ParseException("Unknown directive found");

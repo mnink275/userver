@@ -17,12 +17,14 @@ inline const std::string kStale = "stale";
 inline const std::string kUri = "uri";
 inline const std::string kDomain = "domain";
 inline const std::string kResponse = "response";
+inline const std::string kResponseAuth = "rspauth";
 inline const std::string kAlgorithm = "algorithm";
 inline const std::string kCnonce = "cnonce";
 inline const std::string kOpaque = "opaque";
 inline const std::string kQop = "qop";
 inline const std::string kNonceCount = "nc";
-inline const std::string kAuthParam = "auth-param";
+inline const std::string kUserhash = "userhash";
+inline const std::string kCharset = "charset";
 
 }  // namespace server::handlers::auth::digest::directives
 

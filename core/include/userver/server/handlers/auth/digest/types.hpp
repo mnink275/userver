@@ -10,33 +10,38 @@ USERVER_NAMESPACE_BEGIN
 namespace server::handlers::auth::digest {
 
 /// @brief Supported hashing algorithms
-enum class HashAlgTypes {
-  kMD5,     ///< MD5 algorithm
-  kSHA256,  ///< SHA256 algorithm
-  kSHA512,  ///< SHA512 algorithm
-  kUnknown  ///< Unknown algorithm
+enum class HashAlgorithmsTypes {
+  kMD5,     ///< MD5 algorithm (not recommended, for backward compatibility)
+  kSHA256,  ///< SHA-256 algorithm (default)
+  kSHA512,  ///< SHA-512 algorithm
 };
 
-/// @brief Supported `qop-options` from
-/// https://datatracker.ietf.org/doc/html/rfc2617#section-3.2.1
+/// @brief Supported `qop` field values. See 'qop' from
+/// https://datatracker.ietf.org/doc/html/rfc7616#section-3.3
 enum class QopTypes {
-  kAuth,    ///< `The value "auth" indicates authentication` from
-            ///< https://datatracker.ietf.org/doc/html/rfc2617#section-3.2.1
-  kUnknown  ///< Unknown qop-value
+  kAuth,  ///< The value "auth" indicates authentication (default)
 };
 
-inline constexpr utils::TrivialBiMap kHashAlgToType = [](auto selector) {
+/// @cond
+// To handle algorithm Session variant. See: 'algorithm' from
+// https://datatracker.ietf.org/doc/html/rfc7616#section-3.3
+constexpr std::string_view kSessSuffix = "-sess";
+/// @endcond
+
+inline constexpr utils::TrivialBiMap kHashAlgorithmsMap = [](auto selector) {
   return selector()
-      .Case("md5", HashAlgTypes::kMD5)
-      .Case("sha256", HashAlgTypes::kSHA256)
-      .Case("sha512", HashAlgTypes::kSHA512);
+      .Case("MD5", HashAlgorithmsTypes::kMD5)
+      .Case("SHA-256", HashAlgorithmsTypes::kSHA256)
+      .Case("SHA-512", HashAlgorithmsTypes::kSHA512);
 };
 
 inline constexpr utils::TrivialBiMap kQopToType = [](auto selector) {
   return selector().Case("auth", QopTypes::kAuth);
 };
 
-// enum
+inline constexpr utils::TrivialSet kSupportedCharsets = [](auto selector) {
+  return selector().Case("UTF-8");
+};
 
 }  // namespace server::handlers::auth::digest
 

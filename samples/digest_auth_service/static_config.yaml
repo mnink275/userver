@@ -7,24 +7,26 @@ components_manager:
             dns_resolver: async
         # /// [digest config]
         auth-digest-checker-settings:
-            algorithm: MD5
-            qops:
+            algorithm: SHA-256
+            qop:
               - auth
             is-proxy: false
-            is-session: false
-            domains:
+            domain:
               - /v1/hello
             nonce-ttl: 1000s
+            charset: UTF-8
+            userhash: false
         # /// [digest config]
         auth-digest-checker-settings-proxy:
-            algorithm: MD5
-            qops:
+            algorithm: SHA-256
+            qop:
               - auth
             is-proxy: true
-            is-session: false
-            domains:
-              - /v1/hello
+            domain:
+              - /v1/hello-proxy
             nonce-ttl: 1000s
+            charset: UTF-8
+            userhash: false
         # /// [digest config]
         # /// [hello config]
         handler-hello:

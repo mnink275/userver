@@ -26,12 +26,18 @@ namespace server::handlers::auth::digest {
 ///
 /// Name       | Description                                    | Default value
 /// ---------- | ---------------------------------------------- | -------------
-/// algorithm  | algorithm for hashing nonce                    | sha256
-/// domains    | list of URIs, that define the protection space | /
-/// qops       | list of supported qop-options. Use `auth` for authentication and `auth-in` for authentication with integrity protection | auth
-/// is-proxy   | indicates that the server is a proxy server. If set, the Proxy prefix is inserted into the header | false
-/// is-session | activate session algorithm (md5-sess, sha256-sess or sha512-sess) | false
+/// algorithm  | Hashing algorithms. You can use Session variant with `-sess` suffix (e.g. SHA-265-sess). | SHA-256
+/// domain     | List of URIs, that define the protection space | /
+/// qop        | list of supported qop-options. Use `auth` for authentication and `auth-in` for authentication with integrity protection | auth
 /// nonce-ttl  | ttl for nonce | 10s
+
+/// ## Supported hashing algorithms:
+///
+/// Name       | Description                                
+/// ---------- | -------------------------------------------
+/// SHA-256    | Default                                    
+/// SHA-512    |                                            
+/// MD5        | Not recommended, for backward compatibility
 
 // clang-format on
 
