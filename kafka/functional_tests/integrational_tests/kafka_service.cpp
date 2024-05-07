@@ -20,7 +20,6 @@
 #include <userver/server/handlers/tests_control.hpp>
 
 #include <userver/storages/secdist/component.hpp>
-#include <userver/storages/secdist/provider_component.hpp>
 
 #include <userver/kafka/components/consumer_component.hpp>
 #include <userver/kafka/components/producer_component.hpp>
@@ -408,7 +407,6 @@ int main(int argc, char* argv[]) {
           .Append<kafka::ProducerComponent>("kafka-producer-second")
           .Append<components::TestsuiteSupport>()
           .Append<components::Secdist>()
-          .Append<components::DefaultSecdistProvider>()
           .Append<components::HttpClient>()
           .Append<clients::dns::Component>()
           .Append<server::handlers::TestsControl>()
